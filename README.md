@@ -56,3 +56,6 @@ http://cspbuilder.info/
 
 CSP version 1.1:  
 http://w3c.github.io/webappsec/specs/content-security-policy/csp-specification.dev.html
+
+Scriptless Attacks paper (what CSP can protect you from):  
+http://www.nds.rub.de/media/emma/veroeffentlichungen/2012/08/16/scriptlessAttacks-ccs2012.pdf
