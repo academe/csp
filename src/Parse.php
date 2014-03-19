@@ -81,8 +81,16 @@ class Parse
         list($name, $policie_list) = $directive_split;
 
         // We will trim the policy list string, to keep it clean.
+        // Strictly it may have a single leading space, and treating
+        // additional spaces as an exception may be something that is
+        // desireable, but for now we just want to parse as much as we
+        // can.
 
         $policie_list = trim($policie_list);
+
+        // The policy list contains policies separated by a single space.
+
+        // TODO
 
         // The array is clunky. It should really be an object, then we can put
         // validity flags and error messages etc. into as necessary.
