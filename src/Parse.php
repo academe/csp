@@ -8,15 +8,41 @@ namespace Academe\Csp;
 
 class Parse
 {
+    // A list of directive names.
+    // TODO: find somewhere more central for metadata.
+
+    protected $directives = array(
+        'base-uri',
+        'child-src',
+        'frame-src',
+        'connect-src',
+        'default-src',
+        'font-src',
+        'form-action',
+        'frame-ancestors',
+        'frame-src',
+        'img-src',
+        'media-src',
+        'object-src',
+        'plugin-types',
+        'referrer',
+        'reflected-xss',
+        'report-uri',
+        'sandbox',
+        'script-src',
+        'style-src',
+    );
+
     /**
-     * Parse a list of directives.
-     * This is a list of multiple policies as a string.
+     * Parse a security policy into a list of directives.
      */
 
     public function parseDirectives($directives)
     {
         // TODO: confirm the directives is a string.
         // Maybe allow an array and tread them as already split?
+
+        $lc_names = array();
 
         // The directives are separated by semi-colons.
         // Semi-colons are not allowed anywhere else in the directive list without
@@ -30,13 +56,9 @@ class Parse
         // Parse each individual directive.
 
         foreach($directive_list as $directive) {
-            // Each directive, after the first one, should have exactly one space
-            // prefixing it (separators are "; ").
-            // A lazy trim will help clean out multiple spaces or trailing spaces.
-            // A more strict approach would treat unexpected spaces as an exception.
             // Parse this single directive.
 
-            $parsed_directive = $this->parseDirective(trim($directive));
+            $parsed_directive = $this->splitDirective(ltrim($directive, " \t"));
 
             // If it was not parsable, then skip it.
 
@@ -44,60 +66,64 @@ class Parse
                 continue;
             }
 
+            // Get the directive-name and directive-value.
+            // We are really only part way through - the value needs parsing into policies.
+
             $name = $parsed_directive['name'];
-            $policies = $parsed_directive['policies'];
+            $value = $parsed_directive['value'];
 
             // If we have already encountered this directive, then skip it.
             // Only the first instance should be recognised.
+            // The match is case-insensitive.
 
-            if (isset($parsed[$name])) {
+            if (in_array(strtolower($name), $lc_names)) {
                 continue;
             }
 
-            $parsed[$name] = $policies;
+            $lc_names[] = strtolower($name);
+
+            $parsed[$name] = $value;
         }
 
         return $parsed;
     }
 
     /**
-     * Parse a single directive.
+     * Split a single directive into a name and value.
      * Returns an array (maybe an object later?) or null if not parsable.
      */
 
-    public function parseDirective($directive)
+    public function splitDirective($directive)
     {
-        // The token up to the first space is the name of the directive.
+        // The token up to the first WSP is the name of the directive.
         // After the first space is the list of policies.
 
-        $directive_split = explode(' ', $directive, 2);
+        $directive_split = preg_split('/[ \t]+/', $directive, 2);
 
-        // If we don't have two parts, then it is not a valid format.
+        // If we don't have two parts, then the directive has no value.
 
-        if (count($directive_split) != 2) {
+        if (count($directive_split) == 2) {
+            list($directive_name, $directive_value) = $directive_split;
+        } else {
+            list($directive_name) = $directive_split;
+            $directive_value = '';
+        }
+
+        // If the directive has no name, then skip it.
+        // A trailing semi-colon is allowed after the last directive, and that will
+        // look like an empty directive when split.
+
+        if ($directive_name == '') {
             return null;
         }
 
-        list($name, $policie_list) = $directive_split;
-
-        // We will trim the policy list string, to keep it clean.
-        // Strictly it may have a single leading space, and treating
-        // additional spaces as an exception may be something that is
-        // desireable, but for now we just want to parse as much as we
-        // can.
-
-        $policie_list = trim($policie_list);
-
-        // The policy list contains policies separated by a single space.
-
-        // TODO
-
-        // The array is clunky. It should really be an object, then we can put
-        // validity flags and error messages etc. into as necessary.
+        // We have not checked if the directive name or value is valid at this stage.
+        // The name can contain only letters, digits and a dash.
 
         return array(
-            'name' => $name,
-            'policies' => $policie_list,
+            'name' => $directive_name,
+            'value' => $directive_value,
         );
     }
 }
+
