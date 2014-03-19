@@ -59,3 +59,6 @@ http://w3c.github.io/webappsec/specs/content-security-policy/csp-specification.d
 
 Scriptless Attacks paper (what CSP can protect you from):  
 http://www.nds.rub.de/media/emma/veroeffentlichungen/2012/08/16/scriptlessAttacks-ccs2012.pdf
+
+Mike West - XSS. (No, the _other_ "S"); CSSconf.eu 2013:  
+https://www.youtube.com/watch?v=eb3suf4REyI
