@@ -31,6 +31,8 @@ class Parse
         'sandbox',
         'script-src',
         'style-src',
+        'options',
+        'nonce-value',
     );
 
     /**
@@ -82,7 +84,7 @@ class Parse
 
             $lc_names[] = strtolower($name);
 
-            $parsed[$name] = $value;
+            $parsed[$name] = $this->splitSourceList($value);
         }
 
         return $parsed;
@@ -124,6 +126,48 @@ class Parse
             'name' => $directive_name,
             'value' => $directive_value,
         );
+    }
+
+    /**
+     * Split a directive value source list into an array of source expressions.
+     */
+
+    public function splitSourceList($directive_value)
+    {
+        // Trim both leading and trailing space.
+        $directive_value = trim($directive_value, " \t");
+
+        // If empty, then nothing more to do.
+        if ($directive_value == '') return array();
+
+        // Split on spaces. Multiple spaces are permitted.
+        $split = preg_split('/[ \t]+/', $directive_value);
+
+        $source_expressions = array();
+
+        foreach($split as $source_expression) {
+            // TODO: skip (or mark as invalid) if the source expression does not
+            // meet the valid grammar.
+
+            // TODO: (maybe in a seprate method) parse the expression and perform URL
+            // i18n decoding if necessary. We will decode as much as possible when
+            // parsing, to make the data as humanly readble as we can. When reconstructing
+            // the policy string, any relevant encoding will be reapplied.
+
+            // Decode percentage encodings here. The RFC states that only ; and ,
+            // will be encoded, and only into %3B and %2C respectively. We will take
+            // it at face value.
+
+            $source_expression = str_replace(
+                array('%3B', '%2C'),
+                array(';', ','),
+                $source_expression
+            );
+
+            $source_expressions[] = $source_expression;
+        }
+
+        return $source_expressions;
     }
 }
 
