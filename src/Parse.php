@@ -156,7 +156,7 @@ class Parse
 
             // Decode percentage encodings here. The RFC states that only ; and ,
             // will be encoded, and only into %3B and %2C respectively. We will take
-            // it at face value.
+            // it at face value and just decode those two characters.
 
             $source_expression = str_replace(
                 array('%3B', '%2C'),
