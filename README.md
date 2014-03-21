@@ -72,3 +72,6 @@ http://content-security-policy.com/
 
 NCC Group CSP best practices (good examples):  
 https://www.isecpartners.com/media/106598/csp_best_practices.pdf
+
+CSP playground with working examples to try out with your browser:  
+http://www.cspplayground.com/
