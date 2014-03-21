@@ -67,3 +67,5 @@ Brandon Sterne's JavaScript bookmarklet:
 http://brandon.sternefamily.net/2010/10/content-security-policy-recommendation-bookmarklet/  
 https://github.com/bsterne/bsterne-tools/tree/master/csp-bookmarklet
 
+CSP 1.0 summary and practical examples:  
+http://content-security-policy.com/
