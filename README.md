@@ -69,3 +69,6 @@ https://github.com/bsterne/bsterne-tools/tree/master/csp-bookmarklet
 
 CSP 1.0 summary and practical examples:  
 http://content-security-policy.com/
+
+NCC Group CSP best practices (good examples):  
+https://www.isecpartners.com/media/106598/csp_best_practices.pdf
