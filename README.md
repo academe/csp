@@ -2,7 +2,8 @@ Content Security Policy
 =======================
 
 The aim of this library is to provide some back-end tools for implementing
-a Content Security Policy on an application. It is written in PHP.
+a Content Security Policy on an application. It is written in PHP 5.3+.
+There is no compelling reason to use PHP5.4 features at this stage.
 
 Autoloading
 -----------
