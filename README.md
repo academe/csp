@@ -62,3 +62,8 @@ http://www.nds.rub.de/media/emma/veroeffentlichungen/2012/08/16/scriptlessAttack
 
 Mike West - XSS. (No, the _other_ "S"); CSSconf.eu 2013:  
 https://www.youtube.com/watch?v=eb3suf4REyI
+
+Brandon Sterne's JavaScript bookmarklet:  
+http://brandon.sternefamily.net/2010/10/content-security-policy-recommendation-bookmarklet/  
+https://github.com/bsterne/bsterne-tools/tree/master/csp-bookmarklet
+
