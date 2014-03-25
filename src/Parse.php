@@ -10,36 +10,68 @@ class Parse
 {
     // A list of directive names.
     // TODO: find somewhere more central for metadata.
+    // TODO: perhaps have a think about whether v1.0 and v1.1 support should be switchable in some way.
 
     protected $directives = array(
-        'base-uri',
-        'child-src',
-        'frame-src',
-        'connect-src',
+        // CSP 1.0
         'default-src',
-        'font-src',
-        'form-action',
-        'frame-ancestors',
-        'frame-src',
+        'script-src',
+        'object-src',
         'img-src',
         'media-src',
-        'object-src',
+        'frame-src',
+        'font-src',
+        'connect-src',
+        'style-src',
+        'sandbox',
+        'report-uri',
+
+        // CSP 1.1
+        'base-uri',
+        'child-src',
+        'form-action',
+        'frame-ancestors',
         'plugin-types',
         'referrer',
         'reflected-xss',
-        'report-uri',
-        'sandbox',
-        'script-src',
-        'style-src',
         'options',
         'nonce-value',
     );
+
+    // Policy keywords.
+
+    protected $keywords = array(
+        // Matches no sources.
+        "'none'",
+        // Curremnt origin.
+        "'self'",
+        // Inline JS and CSS.
+        // Not using this is likely to break much legacy code. I cannot imagine
+        // not using this keyword on WordPress, but not using it is a worthwhile
+        // aim.
+        "'unsafe-inline'",
+        // Text-to-JS mechanisms.
+        "'unsafe-eval'",
+    );
+
+    // HTTP headers.
+    // Prior to FF v23, X-Content-Security-Policy and X-Content-Security-Policy-Report-Only
+    // was supported. This is deprecated but not yet removed from FF. However, even IE10 only
+    // supports the X-* variants and not the full 1.0 or 1.1 standard.
+
+    protected $headers = array(
+        'Content-Security-Policy',
+        'Content-Security-Policy-Report-Only',
+    );
+
+    // White space characters.
+    const WSP = " \t";
 
     /**
      * Parse a security policy into a list of directives.
      */
 
-    public function parseDirectives($directives)
+    public function parseDirectives($directive_strings)
     {
         // TODO: confirm the directives is a string.
         // Maybe allow an array and tread them as already split?
@@ -50,44 +82,43 @@ class Parse
         // Semi-colons are not allowed anywhere else in the directive list without
         // being percentage escaped.
 
-        $directive_list = explode(';', $directives);
+        $directive_list = explode(';', $directive_strings);
 
         // The array of parsed directives we will return.
-        $parsed = array();
+        $directives = array();
 
         // Parse each individual directive.
 
-        foreach($directive_list as $directive) {
+        foreach($directive_list as $directive_string) {
             // Parse this single directive.
 
-            $parsed_directive = $this->splitDirective(ltrim($directive, " \t"));
+            $directive = $this->splitDirective(ltrim($directive_string, self::WSP));
 
             // If it was not parsable, then skip it.
 
-            if ( ! isset($parsed_directive)) {
+            if ( ! isset($directive)) {
                 continue;
             }
 
             // Get the directive-name and directive-value.
             // We are really only part way through - the value needs parsing into policies.
 
-            $name = $parsed_directive['name'];
-            $value = $parsed_directive['value'];
+            $name = $directive->getName();
 
             // If we have already encountered this directive, then skip it.
             // Only the first instance should be recognised.
             // The match is case-insensitive.
 
-            if (in_array(strtolower($name), $lc_names)) {
+            if (in_array($directive->getNormalisedName(), $lc_names)) {
                 continue;
             }
 
-            $lc_names[] = strtolower($name);
+            $lc_names[] = $directive->getNormalisedName();
 
-            $parsed[$name] = $this->splitSourceList($value);
+            $directives[$directive->getName()] = $directive;
         }
 
-        return $parsed;
+        return $directives;
     }
 
     /**
@@ -95,12 +126,12 @@ class Parse
      * Returns an array (maybe an object later?) or null if not parsable.
      */
 
-    public function splitDirective($directive)
+    public function splitDirective($directive_string)
     {
         // The token up to the first WSP is the name of the directive.
         // After the first space is the list of policies.
 
-        $directive_split = preg_split('/[ \t]+/', $directive, 2);
+        $directive_split = preg_split('/[' . self::WSP . ']+/', $directive_string, 2);
 
         // If we don't have two parts, then the directive has no value.
 
@@ -121,19 +152,25 @@ class Parse
 
         // We have not checked if the directive name or value is valid at this stage.
         // The name can contain only letters, digits and a dash.
+        // TODO: some kind of factory here.
 
-        return array(
-            'name' => $directive_name,
-            'value' => $directive_value,
-        );
+        $directive = new Directive($directive_name);
+
+        $source_list = $this->splitDirectiveValue($directive_value);
+
+        $directive->addSourceExpressionList($source_list);
+
+        return $directive;
     }
 
     /**
-     * Split a directive value source list into an array of source expressions.
+     * Split a directive value source string into an array of source expression strings.
      */
 
-    public function splitSourceList($directive_value)
+    public function splitDirectiveValue($directive_value)
     {
+        $source_list = array();
+
         // Trim both leading and trailing space.
         $directive_value = trim($directive_value, " \t");
 
@@ -141,9 +178,7 @@ class Parse
         if ($directive_value == '') return array();
 
         // Split on spaces. Multiple spaces are permitted.
-        $split = preg_split('/[ \t]+/', $directive_value);
-
-        $source_expressions = array();
+        $split = preg_split('/[' . self::WSP . ']+/', $directive_value);
 
         foreach($split as $source_expression) {
             // TODO: skip (or mark as invalid) if the source expression does not
@@ -154,20 +189,30 @@ class Parse
             // parsing, to make the data as humanly readble as we can. When reconstructing
             // the policy string, any relevant encoding will be reapplied.
 
-            // Decode percentage encodings here. The RFC states that only ; and ,
-            // will be encoded, and only into %3B and %2C respectively. We will take
-            // it at face value and just decode those two characters.
+            // Decode percentage encodings.
+            // CHECKME: does this apply to ANY source expression, or just the URLs?
 
-            $source_expression = str_replace(
-                array('%3B', '%2C'),
-                array(';', ','),
-                $source_expression
-            );
-
-            $source_expressions[] = $source_expression;
+            $source_list[] = $this->decodeSourceExpression($source_expression);
         }
 
-        return $source_expressions;
+        return $source_list;
+    }
+
+    /**
+     * Decode percentage encoding from a source expression.
+     * The RFC states that only ; and , will be encoded, and only into %3B and %2C respectively.
+     * We will take it at face value and just decode those two characters.
+     * It may make more sence to decode ANY percent-encoded character using rawurldecode() and make it
+     * case-insensitive.
+     */
+
+    public function decodeSourceExpression($source_expression)
+    {
+        return str_replace(
+            array('%3B', '%2C'),
+            array(';', ','),
+            $source_expression
+        );
     }
 }
 
