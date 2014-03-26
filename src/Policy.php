@@ -6,6 +6,9 @@ namespace Academe\Csp;
  * A single policy can have multiple directives.
  * A web page can be delivered with multiple policies, which are enforced
  * according to the RFC (http://www.w3.org/TR/2014/WD-CSP11-20140211/)
+ * Rendering a policy will involve rendering all the directives and combining
+ * them together.
+ * TODO: implement an iterator interface for the directives list.
  */
 
 class Policy
@@ -39,16 +42,27 @@ class Policy
      * parsing, validating).
      */
 
-    public function addDirective(Directive $directive, $duplicate = self::DUP_ERROR)
+    public function addDirective(Directive $directive, $duplicate_handler = self::DUP_ERROR)
     {
         // Get the name for indexing the directive list.
         $normalised_name = $directive->getNormalisedName();
 
-        if ( ! isset($this->directives[$normalised_name])) {
-            // Not a duplicate, just add it to the list.
+        if ( ! isset($this->directives[$normalised_name]) || $duplicate_handler == self::DUP_REPLACE) {
+            // Not a duplicate, or we are replacing, just add it to the list.
             $this->directives[$normalised_name] = $directive;
         } else {
-            // TODO: we have been given a duplicate, so we need to handle that.
+            // We have been given a duplicate, so we need to handle that.
+            if ($duplicate_handler == self::DUP_ERROR) {
+                // TODO: raise exception.
+            } elseif ($duplicate_handler == self::DUP_APPEND) {
+                // TODO: do we need to check and skip duplicate sources when
+                // appending? Or will the Directive we are appending to handle
+                // that for us?
+            } elseif ($duplicate_handler == self::DUP_DISCARD) {
+                // Discarding, so just do nothing.
+            } else {
+                // TODO: unknown handler flag; raise an exception.
+            }
         }
 
         return $this;
