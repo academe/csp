@@ -85,7 +85,7 @@ class Parse
         $directive_list = explode(';', $directive_strings);
 
         // The array of parsed directives we will return.
-        $directives = array();
+        $policy = new Policy();
 
         // Parse each individual directive.
 
@@ -100,25 +100,10 @@ class Parse
                 continue;
             }
 
-            // Get the directive-name and directive-value.
-            // We are really only part way through - the value needs parsing into policies.
-
-            $name = $directive->getName();
-
-            // If we have already encountered this directive, then skip it.
-            // Only the first instance should be recognised.
-            // The match is case-insensitive.
-
-            if (in_array($directive->getNormalisedName(), $lc_names)) {
-                continue;
-            }
-
-            $lc_names[] = $directive->getNormalisedName();
-
-            $directives[$directive->getName()] = $directive;
+            $policy->addDirective($directive, Policy::DUP_DISCARD);
         }
 
-        return $directives;
+        return $policy;
     }
 
     /**
