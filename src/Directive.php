@@ -11,11 +11,10 @@ namespace Academe\Csp;
  *   or just data like Data Mapper? Let's start with the latter and see
  *   where it takes us.
  * TODO: make this an abstract, so it can be extended.
- * TOOD: implement an interface that allows the source list to be iterated over.
  * TODO: implement a status so it can be marked as invalid if appropriate.
  */
 
-class Directive
+class Directive implements \Iterator
 {
     /**
      * The directive name.
@@ -29,6 +28,26 @@ class Directive
      */
 
     protected $source_list = array();
+
+    /**
+     * Iterator methods for looping over the difrectives.
+     */
+
+    function rewind() {
+        return reset($this->source_list);
+    }
+    function current() {
+        return current($this->source_list);
+    }
+    function key() {
+        return key($this->source_list);
+    }
+    function next() {
+        return next($this->source_list);
+    }
+    function valid() {
+        return key($this->source_list) !== null;
+    }
 
     /**
      * Directive name can be set on creation.
