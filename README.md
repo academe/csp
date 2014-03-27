@@ -2,7 +2,8 @@ Content Security Policy
 =======================
 
 The aim of this library is to provide some back-end tools for implementing
-a Content Security Policy on an application. It is written in PHP.
+a Content Security Policy on an application. It is written in PHP 5.3+.
+There is no compelling reason to use PHP5.4 features at this stage.
 
 Autoloading
 -----------
@@ -62,3 +63,16 @@ http://www.nds.rub.de/media/emma/veroeffentlichungen/2012/08/16/scriptlessAttack
 
 Mike West - XSS. (No, the _other_ "S"); CSSconf.eu 2013:  
 https://www.youtube.com/watch?v=eb3suf4REyI
+
+Brandon Sterne's JavaScript bookmarklet:  
+http://brandon.sternefamily.net/2010/10/content-security-policy-recommendation-bookmarklet/  
+https://github.com/bsterne/bsterne-tools/tree/master/csp-bookmarklet
+
+CSP 1.0 summary and practical examples:  
+http://content-security-policy.com/
+
+NCC Group CSP best practices (good examples):  
+https://www.isecpartners.com/media/106598/csp_best_practices.pdf
+
+CSP playground with working examples to try out with your browser:  
+http://www.cspplayground.com/
