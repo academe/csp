@@ -8,16 +8,15 @@ namespace Academe\Csp;
  * according to the RFC (http://www.w3.org/TR/2014/WD-CSP11-20140211/)
  * Rendering a policy will involve rendering all the directives and combining
  * them together.
- * TODO: implement an iterator interface for the directives list.
  */
 
-class Policy
+class Policy implements \Iterator
 {
     /**
      * Multiple directives can be held in this policy.
      */
 
-    protected $directives = array();
+    protected $directive_list = array();
 
     /**
      * Flags to indicate how to handle duplicates when adding directives.
@@ -36,6 +35,44 @@ class Policy
     const DUP_APPEND = 4;
 
     /**
+     * Iterator methods for looping over the difrectives.
+     */
+
+    function rewind() {
+        return reset($this->directive_list);
+    }
+    function current() {
+        return current($this->directive_list);
+    }
+    function key() {
+        return key($this->directive_list);
+    }
+    function next() {
+        return next($this->directive_list);
+    }
+    function valid() {
+        return key($this->directive_list) !== null;
+    }
+
+    /**
+     * Convert to a string.
+     */
+
+    public function __toString()
+    {
+        return $this->toString();
+    }
+
+    /**
+     * Convert to a string for use in a header or meta tag.
+     */
+
+    public function toString()
+    {
+        return implode('; ', $this->directive_list);
+    }
+
+    /**
      * Add a directive to the list.
      * Each directive can only be used once, so we have a choice
      * on how to handle duplicates, depending on what we are doing (building,
@@ -47,9 +84,9 @@ class Policy
         // Get the name for indexing the directive list.
         $normalised_name = $directive->getNormalisedName();
 
-        if ( ! isset($this->directives[$normalised_name]) || $duplicate_handler == self::DUP_REPLACE) {
+        if ( ! isset($this->directive_list[$normalised_name]) || $duplicate_handler == self::DUP_REPLACE) {
             // Not a duplicate, or we are replacing, just add it to the list.
-            $this->directives[$normalised_name] = $directive;
+            $this->directive_list[$normalised_name] = $directive;
         } else {
             // We have been given a duplicate, so we need to handle that.
             if ($duplicate_handler == self::DUP_ERROR) {

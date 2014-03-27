@@ -68,23 +68,21 @@ class Parse
     const WSP = " \t";
 
     /**
-     * Parse a security policy into a list of directives.
+     * Parse a security policy string into a Policy object.
      */
 
-    public function parseDirectives($directive_strings)
+    public function parsePolicy($policy_string)
     {
         // TODO: confirm the directives is a string.
-        // Maybe allow an array and tread them as already split?
-
-        $lc_names = array();
-
         // The directives are separated by semi-colons.
         // Semi-colons are not allowed anywhere else in the directive list without
         // being percentage escaped.
 
-        $directive_list = explode(';', $directive_strings);
+        $directive_list = explode(';', $policy_string);
 
-        // The array of parsed directives we will return.
+        // The Policy object we will return.
+        // TODO: some kind of factory.
+
         $policy = new Policy();
 
         // Parse each individual directive.
@@ -92,7 +90,7 @@ class Parse
         foreach($directive_list as $directive_string) {
             // Parse this single directive.
 
-            $directive = $this->splitDirective(ltrim($directive_string, self::WSP));
+            $directive = $this->parseDirective(ltrim($directive_string, self::WSP));
 
             // If it was not parsable, then skip it.
 
@@ -100,6 +98,7 @@ class Parse
                 continue;
             }
 
+            // Add the directive to the policy, discarding if we already have this directive.
             $policy->addDirective($directive, Policy::DUP_DISCARD);
         }
 
@@ -107,18 +106,18 @@ class Parse
     }
 
     /**
-     * Split a single directive into a name and value.
-     * Returns an array (maybe an object later?) or null if not parsable.
+     * Parse a single directive string into a Directive object.
+     * Returns null if not parsable.
      */
 
-    public function splitDirective($directive_string)
+    public function parseDirective($directive_string)
     {
         // The token up to the first WSP is the name of the directive.
         // After the first space is the list of policies.
 
         $directive_split = preg_split('/[' . self::WSP . ']+/', $directive_string, 2);
 
-        // If we don't have two parts, then the directive has no value.
+        // If we don't have two parts, then the directive has no value (just a name).
 
         if (count($directive_split) == 2) {
             list($directive_name, $directive_value) = $directive_split;
@@ -128,8 +127,8 @@ class Parse
         }
 
         // If the directive has no name, then skip it.
-        // A trailing semi-colon is allowed after the last directive, and that will
-        // look like an empty directive when split.
+        // A trailing semi-colon is allowed after the last directive in a policy, and
+        // that will look like an empty directive when split.
 
         if ($directive_name == '') {
             return null;
@@ -141,7 +140,7 @@ class Parse
 
         $directive = new Directive($directive_name);
 
-        $source_list = $this->splitDirectiveValue($directive_value);
+        $source_list = $this->parseDirectiveValue($directive_value);
 
         $directive->addSourceExpressionList($source_list);
 
@@ -149,20 +148,20 @@ class Parse
     }
 
     /**
-     * Split a directive value source string into an array of source expression strings.
+     * Parse a directive value string into an array of source expression strings.
      */
 
-    public function splitDirectiveValue($directive_value)
+    public function parseDirectiveValue($directive_value)
     {
         $source_list = array();
 
         // Trim both leading and trailing space.
-        $directive_value = trim($directive_value, " \t");
+        $directive_value = trim($directive_value, self::WSP);
 
         // If empty, then nothing more to do.
-        if ($directive_value == '') return array();
+        if ($directive_value == '') return $source_list;
 
-        // Split on spaces. Multiple spaces are permitted.
+        // Split on white spaces. Multiple spaces are permitted.
         $split = preg_split('/[' . self::WSP . ']+/', $directive_value);
 
         foreach($split as $source_expression) {

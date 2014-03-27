@@ -42,6 +42,28 @@ class Directive
     }
 
     /**
+     * Convert to a string.
+     */
+
+    public function __toString()
+    {
+        return $this->toString();
+    }
+
+    /**
+     * Convert to a string for use in a header or meta tag.
+     */
+
+    public function toString()
+    {
+        // Percent encode each source in the list.
+        $encoded = array_map(array($this, 'encodeSourceExpression'), $this->source_list);
+
+        // Join the sources together with a space and prefix the directive name.
+        return trim($this->getName() . ' ' . implode(' ', $encoded));
+    }
+
+    /**
      * Return a normalised directive name, so unique names can be compared.
      */
 
@@ -76,11 +98,14 @@ class Directive
      * This source expression should NOT be percent encoded. Encoding
      * is a function of the rendering of a policy to a string, and does
      * not form part of the policy syntax.
+     * Duplicates are skipped.
      */
 
     public function addSourceExpression($source)
     {
-        $this->source_list[] = $source;
+        if ( ! in_array($source, $this->source_list)) {
+            $this->source_list[] = $source;
+        }
 
         return $this;
     }
@@ -92,6 +117,20 @@ class Directive
         }
 
         return $this;
+    }
+
+    /**
+     * Percent encode a source expression.
+     * Only commas and semi-colons need to be encoded.
+     */
+
+    public function encodeSourceExpression($source_expression)
+    {
+        return str_replace(
+            array(';', ','),
+            array('%3B', '%2C'),
+            $source_expression
+        );
     }
 }
 
