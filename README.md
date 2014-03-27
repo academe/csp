@@ -11,6 +11,24 @@ Autoloading
 This library uses PSR-4 autoloading. The base namespace as \Academe\Csp
 It is designed to be framework agnostic.
 
+Examples
+--------
+
+A policy can be converted into objects for manipulation (or passing to an admin
+form), and then back into a string.
+
+    $policy = "default-src 'self' https://www.google.com ;options inline-script eval-script; *.tile.openstreetmap.org *.tile.opencyclemap.org https://www.google.com;"
+    
+    // Parse into a Policy object.
+    $policy = $parse->parsePolicy($policy);
+    
+    // The policy object will contain an iteratable list of directives, each with an iteratable
+    // list of source expressions.
+    
+    // Back into a policy string.
+    $header_policy = $policy->toString();
+
+
 Development Plan
 ----------------
 
