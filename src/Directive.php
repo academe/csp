@@ -30,7 +30,7 @@ class Directive implements \Iterator
     protected $source_list = array();
 
     /**
-     * Iterator methods for looping over the difrectives.
+     * Iterator methods for looping over the directives.
      */
 
     function rewind() {
@@ -129,6 +129,10 @@ class Directive implements \Iterator
         return $this;
     }
 
+    /**
+     * Add a source expression list (an array).
+     */
+
     public function addSourceExpressionList($source_list)
     {
         foreach($source_list as $source) {
@@ -136,6 +140,15 @@ class Directive implements \Iterator
         }
 
         return $this;
+    }
+
+    /**
+     * Get all the source expressions.
+     */
+
+    public function getSourceExpressionList($source_list)
+    {
+        return $this->source_list;
     }
 
     /**

@@ -19,6 +19,13 @@ class Policy implements \Iterator
     protected $directive_list = array();
 
     /**
+     * The joiner of directives in a policy.
+     * The space is optional in the RFC, but used here for visual clarity.
+     */
+
+    protected $policy_joiner = '; ';
+
+    /**
      * Flags to indicate how to handle duplicates when adding directives.
      */
 
@@ -69,7 +76,7 @@ class Policy implements \Iterator
 
     public function toString()
     {
-        return implode('; ', $this->directive_list);
+        return implode($this->policy_joiner, $this->directive_list);
     }
 
     /**
@@ -85,18 +92,18 @@ class Policy implements \Iterator
         $normalised_name = $directive->getNormalisedName();
 
         if ( ! isset($this->directive_list[$normalised_name]) || $duplicate_handler == self::DUP_REPLACE) {
-            // Not a duplicate, or we are replacing, just add it to the list.
+            // Not a duplicate, or we are replacing duplicates, just add it to the list.
             $this->directive_list[$normalised_name] = $directive;
         } else {
             // We have been given a duplicate, so we need to handle that.
             if ($duplicate_handler == self::DUP_ERROR) {
                 // TODO: raise exception.
             } elseif ($duplicate_handler == self::DUP_APPEND) {
-                // TODO: do we need to check and skip duplicate sources when
-                // appending? Or will the Directive we are appending to handle
-                // that for us?
+                // The directive will handle duplicate source expressions given to it.
+                $this->directive_list[$normalised_name]->addSourceExpressionList($directive->getSourceExpressionList());
             } elseif ($duplicate_handler == self::DUP_DISCARD) {
                 // Discarding, so just do nothing.
+                // This is how a browser would interpret directive duplicates.
             } else {
                 // TODO: unknown handler flag; raise an exception.
             }
