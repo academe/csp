@@ -12,6 +12,7 @@ namespace Academe\Csp;
  *   where it takes us.
  * TODO: make this an abstract, so it can be extended.
  * TODO: implement a status so it can be marked as invalid if appropriate.
+ * Is is http://www.php.net/manual/en/class.arrayobject.php we want, rather than \Interator?
  */
 
 class Directive implements \Iterator
@@ -66,17 +67,17 @@ class Directive implements \Iterator
 
     public function __toString()
     {
-        return $this->toString();
+        return $this->render();
     }
 
     /**
      * Convert to a string for use in a header or meta tag.
      */
 
-    public function toString()
+    public function render()
     {
         // Percent encode each source in the list.
-        $encoded = array_map(array($this, 'encodeSourceExpression'), $this->source_list);
+        $encoded = array_map(array(__NAMESPACE__ . '\Helper\Encode', 'encodeSourceExpression'), $this->source_list);
 
         // Join the sources together with a space and prefix the directive name.
         return trim($this->getName() . ' ' . implode(' ', $encoded));
@@ -118,6 +119,8 @@ class Directive implements \Iterator
      * is a function of the rendering of a policy to a string, and does
      * not form part of the policy syntax.
      * Duplicates are skipped.
+     * These are just strings for now, and I'm not sure the benefit of
+     * takening them further as objects.
      */
 
     public function addSourceExpression($source)
@@ -149,20 +152,6 @@ class Directive implements \Iterator
     public function getSourceExpressionList($source_list)
     {
         return $this->source_list;
-    }
-
-    /**
-     * Percent encode a source expression.
-     * Only commas and semi-colons need to be encoded.
-     */
-
-    public function encodeSourceExpression($source_expression)
-    {
-        return str_replace(
-            array(';', ','),
-            array('%3B', '%2C'),
-            $source_expression
-        );
     }
 }
 

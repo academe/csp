@@ -67,14 +67,14 @@ class Policy implements \Iterator
 
     public function __toString()
     {
-        return $this->toString();
+        return $this->render();
     }
 
     /**
      * Convert to a string for use in a header or meta tag.
      */
 
-    public function toString()
+    public function render()
     {
         return implode($this->policy_joiner, $this->directive_list);
     }

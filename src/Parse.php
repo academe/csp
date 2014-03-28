@@ -8,62 +8,6 @@ namespace Academe\Csp;
 
 class Parse
 {
-    // A list of directive names.
-    // TODO: find somewhere more central for metadata.
-    // TODO: perhaps have a think about whether v1.0 and v1.1 support should be switchable in some way.
-
-    protected $directives = array(
-        // CSP 1.0
-        'default-src',
-        'script-src',
-        'object-src',
-        'img-src',
-        'media-src',
-        'frame-src',
-        'font-src',
-        'connect-src',
-        'style-src',
-        'sandbox',
-        'report-uri',
-
-        // CSP 1.1
-        'base-uri',
-        'child-src',
-        'form-action',
-        'frame-ancestors',
-        'plugin-types',
-        'referrer',
-        'reflected-xss',
-        'options',
-        'nonce-value',
-    );
-
-    // Policy keywords.
-
-    protected $keywords = array(
-        // Matches no sources.
-        "'none'",
-        // Curremnt origin.
-        "'self'",
-        // Inline JS and CSS.
-        // Not using this is likely to break much legacy code. I cannot imagine
-        // not using this keyword on WordPress, but not using it is a worthwhile
-        // aim.
-        "'unsafe-inline'",
-        // Text-to-JS mechanisms.
-        "'unsafe-eval'",
-    );
-
-    // HTTP headers.
-    // Prior to FF v23, X-Content-Security-Policy and X-Content-Security-Policy-Report-Only
-    // was supported. This is deprecated but not yet removed from FF. However, even IE10 only
-    // supports the X-* variants and not the full 1.0 or 1.1 standard.
-
-    protected $headers = array(
-        'Content-Security-Policy',
-        'Content-Security-Policy-Report-Only',
-    );
-
     // White space characters.
     const WSP = " \t";
 
@@ -176,27 +120,10 @@ class Parse
             // Decode percentage encodings.
             // CHECKME: does this apply to ANY source expression, or just the URLs?
 
-            $source_list[] = $this->decodeSourceExpression($source_expression);
+            $source_list[] = Helper\Encode::decodeSourceExpression($source_expression);
         }
 
         return $source_list;
-    }
-
-    /**
-     * Decode percentage encoding from a source expression.
-     * The RFC states that only ; and , will be encoded, and only into %3B and %2C respectively.
-     * We will take it at face value and just decode those two characters.
-     * It may make more sence to decode ANY percent-encoded character using rawurldecode() and make it
-     * case-insensitive.
-     */
-
-    public function decodeSourceExpression($source_expression)
-    {
-        return str_replace(
-            array('%3B', '%2C'),
-            array(';', ','),
-            $source_expression
-        );
     }
 }
 
