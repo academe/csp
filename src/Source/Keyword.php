@@ -4,6 +4,7 @@ namespace Academe\Csp\Source;
 
 /**
  * Keyword source expression.
+ * TODO: all source classes need a common interface for parameter validation.
  */
 
 class Keyword
@@ -24,7 +25,7 @@ class Keyword
     const KEYWORD_UNSAFE_EVAL = "'unsafe-eval'";
 
     /**
-     * Return an array of valid keywords.
+     * Return an array of valid keywords, keyed on the constant name.
      */
 
     public static function validKeywords()
@@ -46,17 +47,26 @@ class Keyword
     /**
      * Set the keyword.
      * The surrounding quotes are optional, for convenience.
+     * Can also pass in the constant name as a string, e.g. 'KEYWORD_SELF'.
      */
 
     public function setKeyword($keyword)
     {
         // Make sure it has quotes.
-        $keyword = "'" . trim($keyword, "'") . "'";
+        $word = trim($keyword, "'");
 
         // Check it is in the valid list.
-        $keywords = $this->validKeywords();
+        $valid_keywords = static::validKeywords();
 
-        if ( ! in_array($keyword, $keywords)) {
+        // Can also pass in the string name of the constant, which will be useful
+        // as keys in drop-down lists.
+        if (isset($valid_keywords[$word])) {
+            $keyword = $valid_keywords[$word];
+        } else {
+            $keyword = "'" . $word . "'";
+        }
+
+        if ( ! in_array($keyword, $valid_keywords)) {
             // TODO: throw custom exception
             throw new \InvalidArgumentException('Invalid source keyword ' . $keyword);
         }
