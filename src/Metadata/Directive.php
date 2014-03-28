@@ -40,11 +40,13 @@ class Directive
         'nonce-value',
     );
 
-    // Type types of source expressions.
+    // Types of source expressions.
     // TODO: move this somewhere else.
     // The source expressions are constructed from component parts, which
     // differ for each scheme, so it is probably worth encapsulating the
     // construction of sources into separate classes.
+    // e.g. a hash is a 'quoted' string containing one of sha256, sha384 or sha512 a
+    // dash (-) and then a base64 encoded string.
 
     protected $sources = array(
         'scheme',
