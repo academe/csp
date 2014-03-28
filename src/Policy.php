@@ -71,7 +71,7 @@ class Policy implements \Iterator
     }
 
     /**
-     * Convert to a string for use in a header or meta tag.
+     * Render as a string for use in a header or meta tag.
      */
 
     public function render()

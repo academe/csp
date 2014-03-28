@@ -40,6 +40,20 @@ class Directive
         'nonce-value',
     );
 
+    // Type types of source expressions.
+    // TODO: move this somewhere else.
+    // The source expressions are constructed from component parts, which
+    // differ for each scheme, so it is probably worth encapsulating the
+    // construction of sources into separate classes.
+
+    protected $sources = array(
+        'scheme',
+        'host',
+        'keyword',
+        'nonce',
+        'hash',
+    );
+
     // Source list keywords (probably belongs somewhere else).
 
     protected $keywords = array(
