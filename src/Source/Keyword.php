@@ -27,18 +27,24 @@ class Keyword
      * Return an array of valid keywords.
      */
 
-    public function validKeywords()
+    public static function validKeywords()
     {
-        return array(
-            static::KEYWORD_NONE,
-            static::KEYWORD_SELF,
-            static::KEYWORD_UNSAFE_INLINE,
-            static::KEYWORD_UNSAFE_EVAL,
-        );
+        // Get the constants.
+        $reflect = new \ReflectionClass(get_called_class());
+        $constants = $reflect->getConstants();
+
+        // Filter out constants that don't start with KEYWORD_
+        foreach($constants as $name => $value) {
+            if (substr($name, 0, 8) != 'KEYWORD_') {
+                unset($constants[$name]);
+            }
+        }
+
+        return $constants;
     }
 
     /**
-     * Set the keywork.
+     * Set the keyword.
      * The surrounding quotes are optional, for convenience.
      */
 
@@ -60,7 +66,7 @@ class Keyword
     }
 
     /**
-     * Provide the keyword at construction.
+     * Provide the keyword at construction, e.g. \Academe\Csp\Source\Keyword::KEYWORD_SELF
      * TODO: make this optional? Then see note on render().
      */
 
@@ -79,3 +85,4 @@ class Keyword
         return $this->keyword;
     }
 }
+
