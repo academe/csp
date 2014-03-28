@@ -56,8 +56,9 @@ class Keyword
         // Check it is in the valid list.
         $keywords = $this->validKeywords();
 
-        if ( ! is_array($keywords, $keyword)) {
-            // TODO: throw exception
+        if ( ! in_array($keyword, $keywords)) {
+            // TODO: throw custom exception
+            throw new \InvalidArgumentException('Invalid source keyword ' . $keyword);
         }
 
         $this->keyword = $keyword;
