@@ -56,22 +56,6 @@ class Directive
         'hash',
     );
 
-    // Source list keywords (probably belongs somewhere else).
-
-    protected $keywords = array(
-        // Matches no sources.
-        "'none'",
-        // Curremnt origin.
-        "'self'",
-        // Inline JS and CSS.
-        // Not using this is likely to break much legacy code. I cannot imagine
-        // not using this keyword on WordPress, but not using it is a worthwhile
-        // aim.
-        "'unsafe-inline'",
-        // Text-to-JS mechanisms.
-        "'unsafe-eval'",
-    );
-
     // HTTP headers.
     // Prior to FF v23, X-Content-Security-Policy and X-Content-Security-Policy-Report-Only
     // was supported. This is deprecated but not yet removed from FF. However, even IE10 only
