@@ -17,6 +17,14 @@ namespace Academe\Csp;
 
 class Directive implements \Iterator
 {
+    const EMPTY_SET_EXPRESSION = "'none'";
+
+    /**
+     * True if this directive represents the empty set, i.e. match nothing.
+     */
+
+    protected $is_empty_set = false;
+
     /**
      * The directive name.
      * The name can take any mix of letter case as the name is case insensitive.
@@ -121,11 +129,22 @@ class Directive implements \Iterator
      * Duplicates are skipped.
      * These are just strings for now, and I'm not sure the benefit of
      * takening them further as objects.
+     * TODO: If 'none' is supplied, then that overrides the entire source list.
+     * Similarly, if 'none' already is the source list, then no other sources
+     * can be added.
      */
 
     public function addSourceExpression($source)
     {
-        if ( ! in_array($source, $this->source_list)) {
+        // If the empty list expression is supplied, then it overrides everything.
+        if ($source == static::EMPTY_SET_EXPRESSION) {
+            $this->setEmpty();
+        }
+
+        // Add the source expression to the list if this is not the empty set,
+        // and the source expression has not already been added.
+
+        if ( ! $this->is_empty_set && ! in_array($source, $this->source_list)) {
             $this->source_list[] = $source;
         }
 
@@ -152,6 +171,35 @@ class Directive implements \Iterator
     public function getSourceExpressionList($source_list)
     {
         return $this->source_list;
+    }
+
+    /**
+     * Set this directive to the "empty set".
+     * This resets all source expressions to a single 'none' and prevents
+     * further expressions from being added.
+     */
+
+    public function setEmpty()
+    {
+        $this->source_list = array(static::EMPTY_SET_EXPRESSION);
+        $this->is_empty_set = true;
+
+        return $this;
+    }
+
+    /**
+     * Remove the empty set flag and 'none' source expression, if set.
+     * TODO: is there a more elegant way than this?
+     */
+
+    public function setNotEmpty()
+    {
+        if ($this->is_empty_set) {
+            $this->source_list = array();
+            $this->is_empty_set = false;
+        }
+
+        return $this;
     }
 }
 

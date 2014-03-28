@@ -5,6 +5,8 @@ namespace Academe\Csp\Source;
 /**
  * Keyword source expression.
  * TODO: all source classes need a common interface for parameter validation.
+ * TODO: 'none' is not a keyword, but is mutually exclusive to all other source expressions.
+ * Have a think about this, because it may be worth leaving it here as an implementaton dertail.
  */
 
 class Keyword
@@ -45,6 +47,15 @@ class Keyword
     }
 
     /**
+     * Get the keyword.
+     */
+
+    public function getKeyword()
+    {
+        return $this->keyword;
+    }
+
+    /**
      * Set the keyword.
      * The surrounding quotes are optional, for convenience.
      * Can also pass in the constant name as a string, e.g. 'KEYWORD_SELF'.
@@ -77,8 +88,9 @@ class Keyword
     }
 
     /**
-     * Provide the keyword at construction, e.g. \Academe\Csp\Source\Keyword::KEYWORD_SELF
-     * TODO: make this optional? Then see note on render().
+     * Provide the keyword at construction,
+     * e.g. \Academe\Csp\Source\Keyword::KEYWORD_SELF
+     * or "'self'" or "KEYWORD_SELF".
      */
 
     public function __construct($keyword)
@@ -88,7 +100,6 @@ class Keyword
 
     /**
      * Render the source expression.
-     * TODO: what is sensible to render if the keyword has not been set?
      */
 
     public function render()
