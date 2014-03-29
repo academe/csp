@@ -10,6 +10,7 @@ class Directive
 {
     /**
      * A list of directive names.
+     * Deprecated
      */
 
     // CSP 1.0
@@ -69,6 +70,7 @@ class Directive
 
     /**
      * Return directive names.
+     * Deprecated
      */
 
     public function getNames($version = '1.1')

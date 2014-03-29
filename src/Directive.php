@@ -17,6 +17,39 @@ namespace Academe\Csp;
 
 class Directive implements \Iterator
 {
+    /**
+     * A list of directive names.
+     */
+
+    // 1.0 and 1.1
+    const DIR_DEFAULT_SRC = 'default-src';
+    const DIR_SCRIPT_SRC = 'script-src';
+    const DIR_OBJECT_SRC = 'object-src';
+    const DIR_IMG_SRC = 'img-src';
+    const DIR_MEDIA_SRC = 'media-src';
+    const DIR_FRAME_SRC = 'frame-src';
+    const DIR_FONT_SRC = 'font-src';
+    const DIR_CONNECT_SRC = 'connect-src';
+    const DIR_STYLE_SRC = 'style-src';
+
+    const DIR_SANDBOX_SRC = 'sandbox';
+    const DIR_REPORT_URI = 'report-uri';
+
+    // 1.1
+    const DIR_BASE_URI = 'base-uri';
+    const DIR_CHILD_SRC = 'child-src';
+    const DIR_FORM_ACTION = 'form-action';
+    const DIR_FRAME_ANCESTORS = 'frame-ancestors';
+    const DIR_PLUGIN_TYPES = 'plugin-types';
+    const DIR_REFERRER = 'referrer';
+    const DIR_REFLECTED_XSS = 'reflected-xss';
+    const DIR_OPTIONS = 'options';
+    const DIR_NONCE_VALUE = 'nonce-value';
+
+    /**
+     * The whole expression list when set as the empty set.
+     */
+
     const EMPTY_SET_EXPRESSION = "'none'";
 
     /**
@@ -27,7 +60,7 @@ class Directive implements \Iterator
 
     /**
      * The directive name.
-     * The name can take any mix of letter case as the name is case insensitive.
+     * The name can take any mix of letter case as the name is case insensitive in use.
      */
 
     protected $name;
@@ -40,6 +73,7 @@ class Directive implements \Iterator
 
     /**
      * Iterator methods for looping over the directives.
+     * Can this go into an iterator abstract, as both Policyt and Directive need it.
      */
 
     function rewind() {
@@ -143,6 +177,9 @@ class Directive implements \Iterator
 
         // Add the source expression to the list if this is not the empty set,
         // and the source expression has not already been added.
+        // TODO: not convinced the empty set should lock out other sources.
+        // Passing in other sources should override this instead, and release
+        // the empty set state.
 
         if ( ! $this->is_empty_set && ! in_array($source, $this->source_list)) {
             $this->source_list[] = $source;
@@ -179,10 +216,19 @@ class Directive implements \Iterator
      * further expressions from being added.
      */
 
-    public function setEmpty()
+    public function setEmpty($state = true)
     {
-        $this->source_list = array(static::EMPTY_SET_EXPRESSION);
-        $this->is_empty_set = true;
+        if ( ! $this->is_empty_set && $state) {
+            // Set the empty set state.
+
+            $this->source_list = array(static::EMPTY_SET_EXPRESSION);
+            $this->is_empty_set = true;
+        } elseif ($this->is_empty_set && ! $state) {
+            // Reset (remove) the empty set state.
+
+            $this->source_list = array();
+            $this->is_empty_set = false;
+        }
 
         return $this;
     }
@@ -194,12 +240,28 @@ class Directive implements \Iterator
 
     public function setNotEmpty()
     {
-        if ($this->is_empty_set) {
-            $this->source_list = array();
-            $this->is_empty_set = false;
+        return $this->setEmpty(false);
+    }
+
+    /**
+     * Return an array of lower-case valid directives, keyed on the constant name.
+     */
+
+    public static function validDirectives()
+    {
+        // Get the constants.
+        $reflect = new \ReflectionClass(get_called_class());
+        $constants = $reflect->getConstants();
+
+        // Filter out constants that don't start with KEYWORD_
+        foreach($constants as $name => $value) {
+            if (substr($name, 0, 4) != 'DIR_') {
+                unset($constants[$name]);
+            }
         }
 
-        return $this;
+        return $constants;
     }
+
 }
 

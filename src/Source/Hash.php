@@ -4,10 +4,9 @@ namespace Academe\Csp\Source;
 
 /**
  * Hash source expression.
- * TODO: all source classes need a common interface for parameter validation.
  */
 
-class Hash
+class Hash implements SourceInterface
 {
     /**
      * The valid algorithms.
@@ -136,6 +135,15 @@ class Hash
     public function render()
     {
         return "'" . $this->algo . '-' . $this->base64_value . "'";
+    }
+
+    /**
+     * Render the source expression.
+     */
+
+    public function __toString()
+    {
+        return $this->render();
     }
 }
 

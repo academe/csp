@@ -4,13 +4,12 @@ namespace Academe\Csp\Source;
 
 /**
  * Scheme source expression.
- * TODO: all source classes need a common interface for parameter validation.
  */
 
-class Scheme
+class Scheme implements SourceInterface
 {
     /**
-     * The scheme (without training colon).
+     * The scheme expression.
      */
 
     protected $scheme;
@@ -25,7 +24,7 @@ class Scheme
     }
 
     /**
-     * Get the scheme.
+     * Get the scheme expression.
      */
 
     public function getScheme($scheme)
@@ -34,19 +33,29 @@ class Scheme
     }
 
     /**
-     * Set the scheme.
+     * Validate the scheme expression.
+     */
+
+    public function isValidScheme($scheme)
+    {
+        return preg_match('/^[a-z][a-z0-9+.-]*:$/i', $scheme);
+    }
+
+    /**
+     * Set the scheme from an expression or just the name (without the colon).
      */
 
     public function setScheme($scheme)
     {
-        // Remove any trailing colon.
+        // Make sure there is a trailing colon.
 
-        $scheme = rtrim($scheme, ':');
+        $scheme = rtrim($scheme, ':') . ':';
 
-        // TODO: The scheme is validated to RFC 3986, section 3.1
+        // The scheme name is validated to RFC 3986, section 3.1
         // scheme = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
+        // The scheme expression includes the trailing colon.
 
-        if ( ! preg_match('/^[a-z][a-z0-9+.-]*$/i', $scheme)) {
+        if ( ! $this->isValidScheme($scheme)) {
             // TODO: throw custom exception
             throw new \InvalidArgumentException('Invalid source scheme ' . $scheme);
         }
@@ -62,6 +71,15 @@ class Scheme
 
     public function render()
     {
-        return $this->scheme . ':';
+        return $this->scheme;
+    }
+
+    /**
+     * Render the source expression.
+     */
+
+    public function __toString()
+    {
+        return $this->render();
     }
 }

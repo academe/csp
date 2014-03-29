@@ -23,7 +23,7 @@ class Policy implements \Iterator
      * The space is optional in the RFC, but used here for visual clarity.
      */
 
-    protected $policy_joiner = '; ';
+    const DIRECTIVE_DELIMITER = '; ';
 
     /**
      * Flags to indicate how to handle duplicates when adding directives.
@@ -76,7 +76,7 @@ class Policy implements \Iterator
 
     public function render()
     {
-        return implode($this->policy_joiner, $this->directive_list);
+        return implode(static::DIRECTIVE_DELIMITER, $this->directive_list);
     }
 
     /**
@@ -105,9 +105,33 @@ class Policy implements \Iterator
                 // Discarding, so just do nothing.
                 // This is how a browser would interpret directive duplicates.
             } else {
-                // TODO: unknown handler flag; raise an exception.
+                // Unknown handler flag.
+                // TODO raise a custom exception.
+                throw new \InvalidArgumentException('Invalid duplicate handler flag ' . $duplicate_handler);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * Add a source expression.
+     * Think about this. The aim is to add a source expression to the relevant
+     * directive, and create that directive if it does not already exist.
+     * We need to know the expression (source object or string?) and directive name.
+     */
+
+    public function addSource($directive_name, Source\SourceInterface $source)
+    {
+        // The directive name can be the full name ('default-src')
+        // or the constant name ('DIR_DEFAULT_SRC').
+
+        // Create a new directive.
+        $directive = new Directive($directive_name);
+
+        $directive->addSourceExpression($source);
+
+        $this->addDirective($directive, self::DUP_APPEND);
 
         return $this;
     }

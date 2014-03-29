@@ -4,12 +4,11 @@ namespace Academe\Csp\Source;
 
 /**
  * Keyword source expression.
- * TODO: all source classes need a common interface for parameter validation.
  * TODO: 'none' is not a keyword, but is mutually exclusive to all other source expressions.
  * Have a think about this, because it may be worth leaving it here as an implementaton dertail.
  */
 
-class Keyword
+class Keyword implements SourceInterface
 {
     /**
      * The current keyword.
