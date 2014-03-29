@@ -120,6 +120,10 @@ class Parse
             // Decode percentage encodings.
             // CHECKME: does this apply to ANY source expression, or just the URLs?
 
+            // TODO: now we will be creating objects instead.
+            // First we need to work out what kind of source it is, then create the
+            // appropriate object.
+
             $source_list[] = Helper\Encode::decodeSourceExpression($source_expression);
         }
 

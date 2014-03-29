@@ -171,6 +171,9 @@ class Directive implements \Iterator
     public function addSourceExpression($source)
     {
         // If the empty list expression is supplied, then it overrides everything.
+        // TODO: The sources are all beign converted to objects, so this test needs
+        // to change, as it is no longer a simple string.
+
         if ($source == static::EMPTY_SET_EXPRESSION) {
             $this->setEmpty();
         }
@@ -220,6 +223,7 @@ class Directive implements \Iterator
     {
         if ( ! $this->is_empty_set && $state) {
             // Set the empty set state.
+            // TODO: we need to set the empty set keyword source object, and not a simple string.
 
             $this->source_list = array(static::EMPTY_SET_EXPRESSION);
             $this->is_empty_set = true;
