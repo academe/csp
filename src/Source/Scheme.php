@@ -9,6 +9,12 @@ namespace Academe\Csp\Source;
 class Scheme implements SourceInterface
 {
     /**
+     * The source type.
+     */
+
+    const SOURCE_TYPE = 'scheme';
+
+    /**
      * The scheme expression.
      */
 
@@ -20,14 +26,14 @@ class Scheme implements SourceInterface
 
     public function __construct($scheme)
     {
-        $this->setScheme($scheme);;
+        $this->setScheme($scheme);
     }
 
     /**
      * Get the scheme expression.
      */
 
-    public function getScheme($scheme)
+    public function getScheme()
     {
         return $this->scheme;
     }

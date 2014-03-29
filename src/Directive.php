@@ -163,29 +163,34 @@ class Directive implements \Iterator
      * Duplicates are skipped.
      * These are just strings for now, and I'm not sure the benefit of
      * takening them further as objects.
-     * TODO: If 'none' is supplied, then that overrides the entire source list.
+     * If 'none' is supplied, then that overrides the entire source list.
      * Similarly, if 'none' already is the source list, then no other sources
      * can be added.
      */
 
-    public function addSourceExpression($source)
+    public function addSource(Source\SourceInterface $source)
     {
-        // If the empty list expression is supplied, then it overrides everything.
-        // TODO: The sources are all beign converted to objects, so this test needs
-        // to change, as it is no longer a simple string.
+        // If the empty list expression is supplied, then the whole source list becomes 'empty'.
 
-        if ($source == static::EMPTY_SET_EXPRESSION) {
-            $this->setEmpty();
+        if ($source::SOURCE_TYPE == 'none') {
+            return $this->setEmpty(true);
         }
 
         // Add the source expression to the list if this is not the empty set,
         // and the source expression has not already been added.
-        // TODO: not convinced the empty set should lock out other sources.
-        // Passing in other sources should override this instead, and release
-        // the empty set state.
 
-        if ( ! $this->is_empty_set && ! in_array($source, $this->source_list)) {
-            $this->source_list[] = $source;
+        // Key the sources on a hash of the rendered source.
+        // This is just to weed out duplicates.
+        // TODO: hash in a method, so we can use other hashes if required.
+        $hash = md5($source);
+
+        if ( ! isset($this->source_list[$hash])) {
+            // If the Directive is the empty set now, then reset that state.
+            if ($this->is_empty_set) {
+                $this->setEmpty(false);
+            }
+
+            $this->source_list[$hash] = $source;
         }
 
         return $this;
@@ -195,10 +200,10 @@ class Directive implements \Iterator
      * Add a source expression list (an array).
      */
 
-    public function addSourceExpressionList($source_list)
+    public function addSourceList($source_list)
     {
         foreach($source_list as $source) {
-            $this->addSourceExpression($source);
+            $this->addSource($source);
         }
 
         return $this;
@@ -208,7 +213,7 @@ class Directive implements \Iterator
      * Get all the source expressions.
      */
 
-    public function getSourceExpressionList($source_list)
+    public function getSourceList($source_list)
     {
         return $this->source_list;
     }

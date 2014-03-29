@@ -100,7 +100,7 @@ class Policy implements \Iterator
                 // TODO: raise exception.
             } elseif ($duplicate_handler == self::DUP_APPEND) {
                 // The directive will handle duplicate source expressions given to it.
-                $this->directive_list[$normalised_name]->addSourceExpressionList($directive->getSourceExpressionList());
+                $this->directive_list[$normalised_name]->addSourceList($directive->getSourceList());
             } elseif ($duplicate_handler == self::DUP_DISCARD) {
                 // Discarding, so just do nothing.
                 // This is how a browser would interpret directive duplicates.
@@ -129,8 +129,11 @@ class Policy implements \Iterator
         // Create a new directive.
         $directive = new Directive($directive_name);
 
-        $directive->addSourceExpression($source);
+        // Add the source to the directive.
+        $directive->addSource($source);
 
+        // Add this directive to the policy, appending the source if the
+        // policy already exists.
         $this->addDirective($directive, self::DUP_APPEND);
 
         return $this;

@@ -11,6 +11,12 @@ namespace Academe\Csp\Source;
 class Keyword implements SourceInterface
 {
     /**
+     * The source type.
+     */
+
+    const SOURCE_TYPE = 'keyword';
+
+    /**
      * The current keyword.
      */
 
@@ -104,6 +110,15 @@ class Keyword implements SourceInterface
     public function render()
     {
         return $this->keyword;
+    }
+
+    /**
+     * Render the source expression.
+     */
+
+    public function __toString()
+    {
+        return $this->render();
     }
 }
 

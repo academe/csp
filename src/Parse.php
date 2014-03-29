@@ -86,7 +86,7 @@ class Parse
 
         $source_list = $this->parseDirectiveValue($directive_value);
 
-        $directive->addSourceExpressionList($source_list);
+        $directive->addSourceList($source_list);
 
         return $directive;
     }
@@ -124,7 +124,13 @@ class Parse
             // First we need to work out what kind of source it is, then create the
             // appropriate object.
 
-            $source_list[] = Helper\Encode::decodeSourceExpression($source_expression);
+            $source_expression = Helper\Encode::decodeSourceExpression($source_expression);
+            if ($source_expression == "'none'") {
+                $source = new Source\None();
+            } else {
+                $source = new Source\Host($source_expression);
+            }
+            $source_list[] = $source;
         }
 
         return $source_list;

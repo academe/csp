@@ -9,6 +9,12 @@ namespace Academe\Csp\Source;
 class Hash implements SourceInterface
 {
     /**
+     * The source type.
+     */
+
+    const SOURCE_TYPE = 'hash';
+
+    /**
      * The valid algorithms.
      */
 

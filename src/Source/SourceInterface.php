@@ -9,3 +9,4 @@ namespace Academe\Csp\Source;
 interface SourceInterface
 {
 }
+
