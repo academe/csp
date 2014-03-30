@@ -73,6 +73,7 @@ class Directive
      * Deprecated
      */
 
+    /*
     public function getNames($version = '1.1')
     {
         if ($version == '1.0') {
@@ -81,4 +82,5 @@ class Directive
             return $this->directives_v1_0 + $this->directives_v1_1_only;
         }
     }
+    */
 }

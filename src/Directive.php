@@ -48,6 +48,7 @@ class Directive implements \Iterator
 
     /**
      * The whole expression list when set as the empty set.
+     * TODO: use Source\None::EMPTY_SET_EXPRESSION to avoid duplication.
      */
 
     const EMPTY_SET_EXPRESSION = "'none'";
@@ -172,7 +173,7 @@ class Directive implements \Iterator
     {
         // If the empty list expression is supplied, then the whole source list becomes 'empty'.
 
-        if ($source::SOURCE_TYPE == 'none') {
+        if ($source->getSourceType() == 'none') {
             return $this->setEmpty(true);
         }
 

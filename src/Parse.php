@@ -123,17 +123,61 @@ class Parse
             // TODO: now we will be creating objects instead.
             // First we need to work out what kind of source it is, then create the
             // appropriate object.
-
-            $source_expression = Helper\Encode::decodeSourceExpression($source_expression);
-            if ($source_expression == "'none'") {
-                $source = new Source\None();
-            } else {
-                $source = new Source\Host($source_expression);
-            }
-            $source_list[] = $source;
+            $source_list[] = $this->parseSourceExpression($source_expression);
         }
 
         return $source_list;
+    }
+
+    /**
+     * Convert a source expression string into a source object.
+     * Decoding is done here of any encoding used just for presentation.
+     */
+
+    public function parseSourceExpression($source_expression)
+    {
+        // Some simple ones first.
+
+        // Match the emoty set.
+        if ($source_expression == Source\None::EMPTY_SET_EXPRESSION) {
+            return new Source\None();
+        }
+
+        // Match a keyword.
+        if (Source\Keyword::isValidKeyword($source_expression)) {
+            return new Source\Keyword($source_expression);
+        }
+
+        // Match a scheme.
+        if (Source\Scheme::isValidScheme($source_expression)) {
+            return new Source\Scheme($source_expression);
+        }
+
+        // Match a hash.
+        $valid_algos = Source\Hash::validAlgos();
+
+        // TODO: check this RE (matches base64 string).
+        if (preg_match('/^\'(' . implode('|', $valid_algos) . ')-[a-z0-9+\/_=-]*\'$/i', $source_expression)) {
+            list($algo, $hash_base64_value) = explode('-', trim($source_expression, "'"), 2);
+            $hash = new Source\Hash($algo);
+
+            // Pass in the 
+            return $hash->setValueBase64($hash_base64_value);
+        }
+
+        // Match a nonce.
+        // TODO: check this RE (matches base64 string).
+        if (preg_match('/^\'nonce-[a-z0-9+\/_=-]*\'$/i', $source_expression)) {
+            list(, $nonce_base64_value) = explode('-', trim($source_expression, "'"), 2);
+            return new Source\Nonce($nonce_base64_value);
+        }
+
+        // Assume whatever is left, will be a host.
+        // We can do some rudamentary validation, but the host expression can take many forms.
+        // We are parsing policy strings, so assume this expression is encoded and so needs decoding.
+        return new Source\Host(
+            Source\Host::decode($source_expression)
+        );
     }
 }
 

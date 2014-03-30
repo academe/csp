@@ -4,9 +4,10 @@ namespace Academe\Csp\Source;
 
 /**
  * Hash source expression.
+ * TODO: the Hash can just extend the Nonce (except for the constructor parameters?).
  */
 
-class Hash implements SourceInterface
+class Hash extends SourceAbstract
 {
     /**
      * The source type.
@@ -35,13 +36,16 @@ class Hash implements SourceInterface
     protected $base64_value = '';
 
     /**
-     * Set the algo on construction.
-     * The value is set later.
+     * Set the algo on construction and optionally the non-encoded value.
      */
 
-    public function __construct($algo)
+    public function __construct($algo, $hash_value = null)
     {
         $this->setAlgo($algo);
+
+        if (isset($hash_value)) {
+            $this->setValue($hash_value);
+        }
     }
 
     /**
@@ -99,9 +103,7 @@ class Hash implements SourceInterface
 
     /**
      * Set the hash base64 value.
-     * TODO: do we need this? When parsing, we will certainly be given a base64
-     * encoded string, but what is presented to the admin will be the actual
-     * non-encoded value.
+     * This is handy when parsing, to reduce the number of decode/encode cycles.
      */
 
     public function setValueBase64($value)
@@ -114,8 +116,7 @@ class Hash implements SourceInterface
     }
 
     /**
-     * Set the hash value.
-     * This value will be base64 encoded.
+     * Set the hash actual value.
      */
 
     public function setValue($value)
@@ -141,15 +142,6 @@ class Hash implements SourceInterface
     public function render()
     {
         return "'" . $this->algo . '-' . $this->base64_value . "'";
-    }
-
-    /**
-     * Render the source expression.
-     */
-
-    public function __toString()
-    {
-        return $this->render();
     }
 }
 

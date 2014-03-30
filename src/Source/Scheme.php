@@ -6,7 +6,7 @@ namespace Academe\Csp\Source;
  * Scheme source expression.
  */
 
-class Scheme implements SourceInterface
+class Scheme extends SourceAbstract
 {
     /**
      * The source type.
@@ -78,14 +78,5 @@ class Scheme implements SourceInterface
     public function render()
     {
         return $this->scheme;
-    }
-
-    /**
-     * Render the source expression.
-     */
-
-    public function __toString()
-    {
-        return $this->render();
     }
 }

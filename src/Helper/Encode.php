@@ -4,6 +4,7 @@ namespace Academe\Csp\Helper;
 
 /**
  * Encoding and decoding.
+ * Deprecated: moved to Source\Host, closer to where it is needed.
  */
 
 class Encode

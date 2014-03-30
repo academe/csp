@@ -8,7 +8,7 @@ namespace Academe\Csp\Source;
  * Have a think about this, because it may be worth leaving it here as an implementaton dertail.
  */
 
-class Keyword implements SourceInterface
+class Keyword extends SourceAbstract
 {
     /**
      * The source type.
@@ -26,7 +26,7 @@ class Keyword implements SourceInterface
      * The valid keywords that can be used.
      */
 
-    const KEYWORD_NONE = "'none'";
+    //const KEYWORD_NONE = "'none'";
     const KEYWORD_SELF = "'self'";
     const KEYWORD_UNSAFE_INLINE = "'unsafe-inline'";
     const KEYWORD_UNSAFE_EVAL = "'unsafe-eval'";
@@ -49,6 +49,17 @@ class Keyword implements SourceInterface
         }
 
         return $constants;
+    }
+
+    /**
+     * Return true if the supplied string is a valid keyword keyword.
+     */
+
+    public static function isValidKeyword($source_expression)
+    {
+        $keywords = static::validKeywords();
+
+        return in_array(strtolower($source_expression), $keywords);
     }
 
     /**
@@ -110,15 +121,6 @@ class Keyword implements SourceInterface
     public function render()
     {
         return $this->keyword;
-    }
-
-    /**
-     * Render the source expression.
-     */
-
-    public function __toString()
-    {
-        return $this->render();
     }
 }
 
