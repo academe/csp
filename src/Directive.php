@@ -67,7 +67,7 @@ class Directive implements \Iterator
      * TODO: use Source\None::EMPTY_SET_EXPRESSION to avoid duplication.
      */
 
-    const EMPTY_SET_EXPRESSION = "'none'";
+    //const EMPTY_SET_EXPRESSION = "'none'";
 
     /**
      * True if this directive represents the empty set, i.e. match nothing.
@@ -77,13 +77,15 @@ class Directive implements \Iterator
 
     /**
      * The directive name.
-     * The name can take any mix of letter case as the name is case insensitive in use.
+     * The name can take any mix of letter case.
+     * The name is case insensitive in use, so we will retain what the application wants to use.
      */
 
     protected $name;
 
     /**
      * The list of sources.
+     * TODO: "source" list, or is this now "directive values"?
      */
 
     protected $source_list = array();
@@ -269,7 +271,7 @@ class Directive implements \Iterator
             // Set the empty set state.
             // TODO: we need to set the empty set keyword source object, and not a simple string.
 
-            $this->source_list = array(static::EMPTY_SET_EXPRESSION);
+            $this->source_list = array(new Source\None());
             $this->is_empty_set = true;
         } elseif ($this->is_empty_set && ! $state) {
             // Reset (remove) the empty set state.
