@@ -24,28 +24,43 @@ class Directive implements \Iterator
      */
 
     // 1.0 and 1.1
-    const DIR_DEFAULT_SRC = 'default-src'; // source-list
-    const DIR_SCRIPT_SRC = 'script-src'; // source-list
-    const DIR_OBJECT_SRC = 'object-src'; // source-list
-    const DIR_IMG_SRC = 'img-src'; // source-list
-    const DIR_MEDIA_SRC = 'media-src'; // source-list
-    const DIR_FRAME_SRC = 'frame-src'; // source-list
-    const DIR_FONT_SRC = 'font-src'; // source-list
-    const DIR_CONNECT_SRC = 'connect-src'; // source-list
-    const DIR_STYLE_SRC = 'style-src'; // source-list
+    // This group all take a source-list, i.e. a list of sources.
+    const DIR_DEFAULT_SRC = 'default-src';
+    const DIR_SCRIPT_SRC = 'script-src';
+    const DIR_OBJECT_SRC = 'object-src';
+    const DIR_IMG_SRC = 'img-src';
+    const DIR_MEDIA_SRC = 'media-src';
+    const DIR_FRAME_SRC = 'frame-src';
+    const DIR_FONT_SRC = 'font-src';
+    const DIR_CONNECT_SRC = 'connect-src';
+    const DIR_STYLE_SRC = 'style-src';
 
-    const DIR_SANDBOX_SRC = 'sandbox'; // space-separated tokens from RFC 2616
+    // sandbox takes space-separated tokens from RFC 2616, same as the sandbox attribute for iframes
+    // i.e. allow-forms, allow-pointer-lock, allow-popups, allow-same-origin, allow-scripts, and allow-top-navigation.
+    const DIR_SANDBOX_SRC = 'sandbox'; 
+    // URI
     const DIR_REPORT_URI = 'report-uri';
 
     // 1.1
-    const DIR_BASE_URI = 'base-uri'; // source-list
-    const DIR_CHILD_SRC = 'child-src'; // source-list
-    const DIR_FORM_ACTION = 'form-action'; // source-list
-    const DIR_FRAME_ANCESTORS = 'frame-ancestors'; // source-list
-    const DIR_PLUGIN_TYPES = 'plugin-types'; // media-type-list
-    const DIR_REFERRER = 'referrer'; // "never" / "default" / "origin" / "always"
-    const DIR_REFLECTED_XSS = 'reflected-xss'; // "allow" / "block" / "filter"
-    const DIR_OPTIONS = 'options'; // values not documented in the RFC
+    // These four take a source-list
+    const DIR_BASE_URI = 'base-uri';
+    const DIR_CHILD_SRC = 'child-src';
+    const DIR_FORM_ACTION = 'form-action';
+    const DIR_FRAME_ANCESTORS = 'frame-ancestors';
+
+    // These four take the specified values.
+
+    // media-type-list, type/sub-type from RFC 2045 (experimental)
+    const DIR_PLUGIN_TYPES = 'plugin-types';
+
+    // "never" / "default" / "origin" / "always"
+    const DIR_REFERRER = 'referrer';
+
+    // "allow" / "block" / "filter"
+    const DIR_REFLECTED_XSS = 'reflected-xss';
+
+    // Values not documented in the RFC, but they look like a CSV list of tokens.
+    const DIR_OPTIONS = 'options';
 
     /**
      * The whole expression list when set as the empty set.
