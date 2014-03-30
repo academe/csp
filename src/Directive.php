@@ -7,9 +7,6 @@ namespace Academe\Csp;
  * Purpose:
  * - Holds main directive details
  * - Holds list of source expressions
- * - Should it contain rendering/formatting methods like Active Record,
- *   or just data like Data Mapper? Let's start with the latter and see
- *   where it takes us.
  * TODO: make this an abstract, so it can be extended.
  * TODO: implement a status so it can be marked as invalid if appropriate.
  * Is is http://www.php.net/manual/en/class.arrayobject.php we want, rather than \Interator?
@@ -182,8 +179,7 @@ class Directive implements \Iterator
 
         // Key the sources on a hash of the rendered source.
         // This is just to weed out duplicates.
-        // TODO: hash in a method, so we can use other hashes if required.
-        $hash = md5($source);
+        $hash = $this->sourceExpressionHash($source);
 
         if ( ! isset($this->source_list[$hash])) {
             // If the Directive is the empty set now, then reset that state.
@@ -195,6 +191,15 @@ class Directive implements \Iterator
         }
 
         return $this;
+    }
+
+    /**
+     * Provide a hash for the source expression.
+     */
+
+    public function sourceExpressionHash($source_expression)
+    {
+        return md5($source_expression);
     }
 
     /**
