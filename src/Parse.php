@@ -4,6 +4,9 @@ namespace Academe\Csp;
 
 /**
  * Provide CSP string parsing and construction functionality.
+ * TODO: Parse should perhaps catch all exceptions raised during the parsing and set
+ * flags to indicate where they occured. Since the policy to parse comes from a third
+ * party, we want to make a good attempt at parsing as much of it as we can.
  */
 
 class Parse
@@ -93,6 +96,12 @@ class Parse
 
     /**
      * Parse a directive value string into an array of source expression strings.
+     * TODO: Not all directives expect a source list. Determine what is expected
+     * by the directive, then parse it appropriately.
+     * The Source expression classes probably need to extend a more generic, so that
+     * non-source values can be included. The array may also need to replaced with a
+     * collection object, as rendering may differ between directive types, e.g. some
+     * examples show options being separate by commas instead of white space.
      */
 
     public function parseDirectiveValue($directive_value)
@@ -120,7 +129,6 @@ class Parse
             // Decode percentage encodings.
             // CHECKME: does this apply to ANY source expression, or just the URLs?
 
-            // TODO: now we will be creating objects instead.
             // First we need to work out what kind of source it is, then create the
             // appropriate object.
             $source_list[] = $this->parseSourceExpression($source_expression);
@@ -173,6 +181,8 @@ class Parse
         }
 
         // Assume whatever is left, will be a host.
+        // CHECKME: the 'options' directive may throw a spanner in that.
+
         // We can do some rudamentary validation, but the host expression can take many forms.
         // We are parsing policy strings, so assume this expression is encoded and so needs decoding.
         return new Source\Host(

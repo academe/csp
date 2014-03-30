@@ -10,6 +10,11 @@ namespace Academe\Csp;
  * TODO: make this an abstract, so it can be extended.
  * TODO: implement a status so it can be marked as invalid if appropriate.
  * Is is http://www.php.net/manual/en/class.arrayobject.php we want, rather than \Interator?
+ * TODO: The RFC lists some source expressions that don't seem to fit into the standard list
+ * of types, and appear to be keywords without quotes, e.g. "allow" is a value for "reflected-xss".
+ * A think about how validation works there would be useful. Reading between the lines, source-list
+ * is just ONE of several sets of parameters that a directive could take. Some directives do not
+ * even take a source-list.
  */
 
 class Directive implements \Iterator
@@ -19,29 +24,28 @@ class Directive implements \Iterator
      */
 
     // 1.0 and 1.1
-    const DIR_DEFAULT_SRC = 'default-src';
-    const DIR_SCRIPT_SRC = 'script-src';
-    const DIR_OBJECT_SRC = 'object-src';
-    const DIR_IMG_SRC = 'img-src';
-    const DIR_MEDIA_SRC = 'media-src';
-    const DIR_FRAME_SRC = 'frame-src';
-    const DIR_FONT_SRC = 'font-src';
-    const DIR_CONNECT_SRC = 'connect-src';
-    const DIR_STYLE_SRC = 'style-src';
+    const DIR_DEFAULT_SRC = 'default-src'; // source-list
+    const DIR_SCRIPT_SRC = 'script-src'; // source-list
+    const DIR_OBJECT_SRC = 'object-src'; // source-list
+    const DIR_IMG_SRC = 'img-src'; // source-list
+    const DIR_MEDIA_SRC = 'media-src'; // source-list
+    const DIR_FRAME_SRC = 'frame-src'; // source-list
+    const DIR_FONT_SRC = 'font-src'; // source-list
+    const DIR_CONNECT_SRC = 'connect-src'; // source-list
+    const DIR_STYLE_SRC = 'style-src'; // source-list
 
-    const DIR_SANDBOX_SRC = 'sandbox';
+    const DIR_SANDBOX_SRC = 'sandbox'; // space-separated tokens from RFC 2616
     const DIR_REPORT_URI = 'report-uri';
 
     // 1.1
-    const DIR_BASE_URI = 'base-uri';
-    const DIR_CHILD_SRC = 'child-src';
-    const DIR_FORM_ACTION = 'form-action';
-    const DIR_FRAME_ANCESTORS = 'frame-ancestors';
-    const DIR_PLUGIN_TYPES = 'plugin-types';
-    const DIR_REFERRER = 'referrer';
-    const DIR_REFLECTED_XSS = 'reflected-xss';
-    const DIR_OPTIONS = 'options';
-    const DIR_NONCE_VALUE = 'nonce-value';
+    const DIR_BASE_URI = 'base-uri'; // source-list
+    const DIR_CHILD_SRC = 'child-src'; // source-list
+    const DIR_FORM_ACTION = 'form-action'; // source-list
+    const DIR_FRAME_ANCESTORS = 'frame-ancestors'; // source-list
+    const DIR_PLUGIN_TYPES = 'plugin-types'; // media-type-list
+    const DIR_REFERRER = 'referrer'; // "never" / "default" / "origin" / "always"
+    const DIR_REFLECTED_XSS = 'reflected-xss'; // "allow" / "block" / "filter"
+    const DIR_OPTIONS = 'options'; // values not documented in the RFC
 
     /**
      * The whole expression list when set as the empty set.
@@ -91,14 +95,12 @@ class Directive implements \Iterator
     }
 
     /**
-     * Directive name can be set on creation.
+     * Directive name must be set on creation.
      */
 
-    public function __construct($name = null)
+    public function __construct($directive_name)
     {
-        if (isset($name)) {
-            $this->setName($name);
-        }
+        $this->setName($directive_name);
     }
 
     /**
@@ -112,15 +114,15 @@ class Directive implements \Iterator
 
     /**
      * Convert to a string for use in a header or meta tag.
+     * TODO: Some directive types may use different separators when imploding (e.g. options). Some only
+     * support one value (so we just render the first or the last, or error if there is more than one).
+     * The values array property should probably not even be called "source_list" now.
      */
 
     public function render()
     {
-        // Percent encode each source in the list.
-        $encoded = array_map(array(__NAMESPACE__ . '\Helper\Encode', 'encodeSourceExpression'), $this->source_list);
-
         // Join the sources together with a space and prefix the directive name.
-        return trim($this->getName() . ' ' . implode(' ', $encoded));
+        return trim($this->getName() . ' ' . implode(' ', $this->source_list));
     }
 
     /**
@@ -129,7 +131,16 @@ class Directive implements \Iterator
 
     public function getNormalisedName()
     {
-        return strtolower($this->name);
+        return static::normalise($this->name);
+    }
+
+    /**
+     * Normalise a directive name string.
+     */
+
+    public static function normalise($name)
+    {
+        return strtolower($name);
     }
 
     /**
@@ -143,12 +154,16 @@ class Directive implements \Iterator
 
     /**
      * Set the directive name.
-     * TODO: validate it is one of the valid names (case insensitive).
      */
 
-    public function setName($name)
+    public function setName($directive_name)
     {
-        $this->name = $name;
+        if ( ! $this->isValidDirective($directive_name)) {
+            // TODO: create some custom exceptions
+            throw new \InvalidArgumentException('Invalid directive name ' . $directive_name);
+        }
+
+        $this->name = $directive_name;
 
         return $this;
     }
@@ -164,6 +179,8 @@ class Directive implements \Iterator
      * If 'none' is supplied, then that overrides the entire source list.
      * Similarly, if 'none' already is the source list, then no other sources
      * can be added.
+     * TODO: a source is just one type of value that can be added. Some directives
+     * accept only one value, some accept non-source values (e.g. media types).
      */
 
     public function addSource(Source\SourceInterface $source)
@@ -228,6 +245,7 @@ class Directive implements \Iterator
      * Set this directive to the "empty set".
      * This resets all source expressions to a single 'none' and prevents
      * further expressions from being added.
+     * This should only apply to directives that accept a source list.
      */
 
     public function setEmpty($state = true)
@@ -278,5 +296,21 @@ class Directive implements \Iterator
         return $constants;
     }
 
+    /**
+     * Check if a string value is a valid directive name.
+     * If check_keys is true, then also allow the name to be a
+     * valid directive key, e.g. 'DIR_IMG_SRC' as well as 'img-src'.
+     */
+
+    public static function isValidDirective($name, $allow_keys = false)
+    {
+        $valid_names = static::validDirectives();
+
+        if ($allow_keys && isset($valid_names[$name])) {
+            return true;
+        }
+
+        return in_array(static::normalise($name), $valid_names);
+    }
 }
 
