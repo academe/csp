@@ -15,15 +15,15 @@ Examples
 --------
 
 A policy can be converted into objects for manipulation (or passing to an admin
-form), and then back into a string.
+form), and then back into a string for storage and use in headers or meta fields.
 
-    $policy = "default-src 'self' https://www.google.com ;options inline-script eval-script; *.tile.openstreetmap.org *.tile.opencyclemap.org https://www.google.com;"
+    $policy = "default-src 'self' https://www.google.com ;options inline-script eval-script; *.tile.openstreetmap.org *.tile.opencyclemap.org https://www.google.com; script-src 'nonce-c2Rjc2RjZHNj'"
     
     // Parse into a Policy object.
     $policy = $parse->parsePolicy($policy);
     
     // The policy object will contain an iteratable list of directives, each with an iteratable
-    // list of source expressions.
+    // list of source expressions. The source expressions are also objects.
     
     // Back into a policy string.
     $header_policy = $policy->toString();
