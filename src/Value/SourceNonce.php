@@ -1,12 +1,12 @@
 <?php
 
-namespace Academe\Csp\Source;
+namespace Academe\Csp\Value;
 
 /**
  * Nonce source expression.
  */
 
-class Nonce extends SourceAbstract
+class SourceNonce extends SourceAbstract
 {
     /**
      * The source type.

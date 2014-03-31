@@ -1,6 +1,6 @@
 <?php
 
-namespace Academe\Csp\Source;
+namespace Academe\Csp\Value;
 
 /**
  * Scheme source expression.

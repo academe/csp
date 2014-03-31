@@ -121,7 +121,7 @@ class Policy implements \Iterator
      * We need to know the expression (source object or string?) and directive name.
      */
 
-    public function addSource($directive_name, Source\SourceInterface $source)
+    public function addSource($directive_name, Value\SourceInterface $source)
     {
         // The directive name can be the full name ('default-src')
         // or the constant name ('DIR_DEFAULT_SRC').

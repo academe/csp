@@ -1,12 +1,12 @@
 <?php
 
-namespace Academe\Csp\Source;
+namespace Academe\Csp\Value;
 
 /**
  * Scheme source expression.
  */
 
-class Scheme extends SourceAbstract
+class SourceScheme extends SourceAbstract
 {
     /**
      * The source type.

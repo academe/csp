@@ -64,7 +64,7 @@ class Directive implements \Iterator
 
     /**
      * The whole expression list when set as the empty set.
-     * TODO: use Source\None::EMPTY_SET_EXPRESSION to avoid duplication.
+     * TODO: use Value\SourceNone::EMPTY_SET_EXPRESSION to avoid duplication.
      */
 
     //const EMPTY_SET_EXPRESSION = "'none'";
@@ -200,7 +200,7 @@ class Directive implements \Iterator
      * accept only one value, some accept non-source values (e.g. media types).
      */
 
-    public function addSource(Source\SourceInterface $source)
+    public function addSource(Value\SourceInterface $source)
     {
         // If the empty list expression is supplied, then the whole source list becomes 'empty'.
 
@@ -271,7 +271,7 @@ class Directive implements \Iterator
             // Set the empty set state.
             // TODO: we need to set the empty set keyword source object, and not a simple string.
 
-            $this->source_list = array(new Source\None());
+            $this->source_list = array(new Value\SourceNone());
             $this->is_empty_set = true;
         } elseif ($this->is_empty_set && ! $state) {
             // Reset (remove) the empty set state.

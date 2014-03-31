@@ -147,27 +147,27 @@ class Parse
         // Some simple ones first.
 
         // Match the emoty set.
-        if ($source_expression == Source\None::EMPTY_SET_EXPRESSION) {
-            return new Source\None();
+        if ($source_expression == Value\SourceNone::EMPTY_SET_EXPRESSION) {
+            return new Value\SourceNone();
         }
 
         // Match a keyword.
-        if (Source\Keyword::isValidKeyword($source_expression)) {
-            return new Source\Keyword($source_expression);
+        if (Value\SourceKeyword::isValidKeyword($source_expression)) {
+            return new Value\SourceKeyword($source_expression);
         }
 
         // Match a scheme.
-        if (Source\Scheme::isValidScheme($source_expression)) {
-            return new Source\Scheme($source_expression);
+        if (Value\SourceScheme::isValidScheme($source_expression)) {
+            return new Value\SourceScheme($source_expression);
         }
 
         // Match a hash.
-        $valid_algos = Source\Hash::validAlgos();
+        $valid_algos = Value\SourceHash::validAlgos();
 
         // TODO: check this RE (matches base64 string).
         if (preg_match('/^\'(' . implode('|', $valid_algos) . ')-[a-z0-9+\/_=-]*\'$/i', $source_expression)) {
             list($algo, $hash_base64_value) = explode('-', trim($source_expression, "'"), 2);
-            $hash = new Source\Hash($algo);
+            $hash = new Value\SourceHash($algo);
 
             // Pass in the 
             return $hash->setValueBase64($hash_base64_value);
@@ -177,7 +177,7 @@ class Parse
         // TODO: check this RE (matches base64 string).
         if (preg_match('/^\'nonce-[a-z0-9+\/_=-]*\'$/i', $source_expression)) {
             list(, $nonce_base64_value) = explode('-', trim($source_expression, "'"), 2);
-            return new Source\Nonce($nonce_base64_value);
+            return new Value\SourceNonce($nonce_base64_value);
         }
 
         // Assume whatever is left, will be a host.
@@ -185,8 +185,8 @@ class Parse
 
         // We can do some rudamentary validation, but the host expression can take many forms.
         // We are parsing policy strings, so assume this expression is encoded and so needs decoding.
-        return new Source\Host(
-            Source\Host::decode($source_expression)
+        return new Value\SourceHost(
+            Value\SourceHost::decode($source_expression)
         );
     }
 }

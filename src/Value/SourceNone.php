@@ -1,12 +1,12 @@
 <?php
 
-namespace Academe\Csp\Source;
+namespace Academe\Csp\Value;
 
 /**
  * "None" source expression.
  */
 
-class None extends SourceAbstract
+class SourceNone extends SourceAbstract
 {
     /**
      * The source type.

@@ -1,6 +1,6 @@
 <?php
 
-namespace Academe\Csp\Source;
+namespace Academe\Csp\Value;
 
 /**
  * Keyword source expression.
@@ -8,7 +8,7 @@ namespace Academe\Csp\Source;
  * Have a think about this, because it may be worth leaving it here as an implementaton dertail.
  */
 
-class Keyword extends SourceAbstract
+class SourceKeyword extends SourceAbstract
 {
     /**
      * The source type.
@@ -105,7 +105,7 @@ class Keyword extends SourceAbstract
 
     /**
      * Provide the keyword at construction,
-     * e.g. \Academe\Csp\Source\Keyword::KEYWORD_SELF
+     * e.g. \Academe\Csp\Value\SourceKeyword::KEYWORD_SELF
      * or "'self'" or "KEYWORD_SELF".
      */
 

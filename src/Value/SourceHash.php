@@ -1,13 +1,13 @@
 <?php
 
-namespace Academe\Csp\Source;
+namespace Academe\Csp\Value;
 
 /**
  * Hash source expression.
  * TODO: the Hash can just extend the Nonce (except for the constructor parameters?).
  */
 
-class Hash extends SourceAbstract
+class SourceHash extends SourceAbstract
 {
     /**
      * The source type.
