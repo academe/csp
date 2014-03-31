@@ -18,23 +18,68 @@ class Referrer extends SourceAbstract
     const REF_ALWAYS = 'always';
 
     /**
+     * Prefix for allowed values constants.
+     */
+
+    const VALUE_LIST_PREFIX = 'REF_';
+
+    /**
      * Return an array of lower-case valid referrer tokens.
-     * TODO: this REALLY needs to go into the abstract.
      */
 
     public static function validTokens()
     {
-        // Get the constants.
-        $reflect = new \ReflectionClass(get_called_class());
-        $constants = $reflect->getConstants();
+        return static::getPrefixedConstants(static::VALUE_LIST_PREFIX);
+    }
 
-        // Filter out constants that don't start with KEYWORD_
-        foreach($constants as $name => $value) {
-            if (substr($name, 0, 4) != 'REF_') {
-                unset($constants[$name]);
-            }
+    /**
+     * Return true if the supplied string is a valid keyword keyword.
+     */
+
+    public static function isValidToken($token)
+    {
+        return static::isValidValue(static::VALUE_LIST_PREFIX, $token);
+    }
+
+    /**
+     * Set the token on construction.
+     */
+
+    public function __construct($token)
+    {
+        $this->setToken($token);
+    }
+
+    /**
+     * Set the token.
+     */
+
+    public function setToken($token)
+    {
+        if ( ! $this->isValidToken($token)) {
+            throw new \InvalidArgumentException('Invalid referrer token ' . $token);
         }
 
-        return $constants;
+        $this->token = $token;
+
+        return $this;
+    }
+
+    /**
+     * Get the token.
+     */
+
+    public function getToken()
+    {
+        return $this->token;
+    }
+
+    /**
+     * Render the token.
+     */
+
+    public function render()
+    {
+        return $this->token;
     }
 }

@@ -37,18 +37,7 @@ class SourceKeyword extends SourceAbstract
 
     public static function validKeywords()
     {
-        // Get the constants.
-        $reflect = new \ReflectionClass(get_called_class());
-        $constants = $reflect->getConstants();
-
-        // Filter out constants that don't start with KEYWORD_
-        foreach($constants as $name => $value) {
-            if (substr($name, 0, 8) != 'KEYWORD_') {
-                unset($constants[$name]);
-            }
-        }
-
-        return $constants;
+        return static::getPrefixedConstants('KEYWORD_');
     }
 
     /**
@@ -57,9 +46,7 @@ class SourceKeyword extends SourceAbstract
 
     public static function isValidKeyword($source_expression)
     {
-        $keywords = static::validKeywords();
-
-        return in_array(strtolower($source_expression), $keywords);
+        return static::isValidValue('KEYWORD_', $source_expression);
     }
 
     /**
