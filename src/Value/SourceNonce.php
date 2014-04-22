@@ -64,6 +64,8 @@ class SourceNonce extends SourceAbstract
 
     /**
      * Get the actual hash value.
+     * TODO: we probably want to handle invalid base64 strings, since they
+     * can come from unknown sources.
      */
 
     public function getValue()

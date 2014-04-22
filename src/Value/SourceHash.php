@@ -23,6 +23,8 @@ class SourceHash extends SourceAbstract
     const ALGO_SHE384 = 'sha384';
     const ALGO_SHE512 = 'sha512';
 
+    const VALUE_LIST_PREFIX = 'ALGO_';
+
     /**
      * The selected algorithm.
      */
@@ -54,24 +56,11 @@ class SourceHash extends SourceAbstract
 
     public static function validAlgos()
     {
-        // Get the constants.
-        $reflect = new \ReflectionClass(get_called_class());
-        $constants = $reflect->getConstants();
-
-        // Filter out constants that don't start with KEYWORD_
-        foreach($constants as $name => $value) {
-            if (substr($name, 0, 5) != 'ALGO_') {
-                unset($constants[$name]);
-            }
-        }
-
-        return $constants;
+        return static::getPrefixedConstants(static::VALUE_LIST_PREFIX);
     }
 
     /**
      * Set the hash algo.
-     * TODO: Retain the letter case supplied, and only normalise
-     * the case when checking validity.
      */
 
     public function setAlgo($algo)
@@ -79,19 +68,13 @@ class SourceHash extends SourceAbstract
         // Algo is case-insensitive. We will just make it lower case, as we don't
         // know where it could have come from while parsing.
 
-        $algo = strtolower($algo);
-
-        // Check it is in the valid list.
-        $valid_algos = static::validAlgos();
-
         // Can also pass in the string name of the constant, which will be useful
         // as keys in drop-down lists.
-
-        if (isset($valid_algos[$algo])) {
-            $algo = $valid_algos[$algo];
+        if (defined('static::' . $algo)) {
+            $algo = constant('static::' . $algo);
         }
 
-        if ( ! in_array($algo, $valid_algos)) {
+        if ( ! $this->isValidValue(self::VALUE_LIST_PREFIX, $algo)) {
             // TODO: throw custom exception
             throw new \InvalidArgumentException('Invalid source hash algo ' . $algo);
         }
@@ -128,6 +111,8 @@ class SourceHash extends SourceAbstract
 
     /**
      * Get the actual hash value.
+     * TODO: we probably want to handle invalid base64 strings, since they
+     * can come from unknown sources.
      */
 
     public function getValue()

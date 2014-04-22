@@ -11,7 +11,7 @@ namespace Academe\Csp;
 
 class Parse
 {
-    // White space characters.
+    // Allowed white space characters.
     const WSP = " \t";
 
     /**
@@ -20,15 +20,16 @@ class Parse
 
     public function parsePolicy($policy_string)
     {
-        // TODO: confirm the directives is a string.
+        // TODO: assert the policy is a string.
         // The directives are separated by semi-colons.
         // Semi-colons are not allowed anywhere else in the directive list without
-        // being percentage escaped.
+        // being percentage escaped. This will only happen in SourceHost as there
+        // are no semi-colons in any of the other directives.
 
         $directive_list = explode(';', $policy_string);
 
         // The Policy object we will return.
-        // TODO: some kind of factory.
+        // TODO: use some kind of factory.
 
         $policy = new Policy();
 
@@ -83,7 +84,7 @@ class Parse
 
         // We have not checked if the directive name or value is valid at this stage.
         // The name can contain only letters, digits and a dash.
-        // TODO: some kind of factory here.
+        // TODO: use some kind of factory here.
 
         $directive = new Directive($directive_name);
 
@@ -146,7 +147,7 @@ class Parse
     {
         // Some simple ones first.
 
-        // Match the emoty set.
+        // Match the empty set.
         if ($source_expression == Value\SourceNone::EMPTY_SET_EXPRESSION) {
             return new Value\SourceNone();
         }
@@ -169,7 +170,7 @@ class Parse
             list($algo, $hash_base64_value) = explode('-', trim($source_expression, "'"), 2);
             $hash = new Value\SourceHash($algo);
 
-            // Pass in the 
+            // Pass in the base64 encoded value.
             return $hash->setValueBase64($hash_base64_value);
         }
 
@@ -184,7 +185,8 @@ class Parse
         // CHECKME: the 'options' directive may throw a spanner in that.
 
         // We can do some rudamentary validation, but the host expression can take many forms.
-        // We are parsing policy strings, so assume this expression is encoded and so needs decoding.
+        // We are parsing policy strings, so assume this expression is encoded for special
+        // characters (, and ;) and so needs decoding.
         return new Value\SourceHost(
             Value\SourceHost::decode($source_expression)
         );

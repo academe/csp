@@ -31,6 +31,8 @@ class SourceKeyword extends SourceAbstract
     const KEYWORD_UNSAFE_INLINE = "'unsafe-inline'";
     const KEYWORD_UNSAFE_EVAL = "'unsafe-eval'";
 
+    const VALUE_LIST_PREFIX = 'KEYWORD_';
+
     /**
      * Return an array of valid keywords, keyed on the constant name.
      */
@@ -46,7 +48,7 @@ class SourceKeyword extends SourceAbstract
 
     public static function isValidKeyword($source_expression)
     {
-        return static::isValidValue('KEYWORD_', $source_expression);
+        return static::isValidValue(self::VALUE_LIST_PREFIX, $source_expression);
     }
 
     /**
@@ -66,21 +68,18 @@ class SourceKeyword extends SourceAbstract
 
     public function setKeyword($keyword)
     {
-        // Make sure it has quotes.
+        // Make sure it has quotes; trim them off first.
         $word = trim($keyword, "'");
-
-        // Check it is in the valid list.
-        $valid_keywords = static::validKeywords();
 
         // Can also pass in the string name of the constant, which will be useful
         // as keys in drop-down lists.
-        if (isset($valid_keywords[$word])) {
-            $keyword = $valid_keywords[$word];
+        if (defined('static::' . $keyword)) {
+            $keyword = constant('static::' . $keyword);
         } else {
             $keyword = "'" . $word . "'";
         }
 
-        if ( ! in_array($keyword, $valid_keywords)) {
+        if ( ! $this->isValidValue(self::VALUE_LIST_PREFIX, $keyword)) {
             // TODO: throw custom exception
             throw new \InvalidArgumentException('Invalid source keyword ' . $keyword);
         }

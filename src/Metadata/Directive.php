@@ -14,6 +14,7 @@ class Directive
      */
 
     // CSP 1.0
+    /*
     protected $directives_v1_0 = array(
         'default-src',
         'script-src',
@@ -27,8 +28,10 @@ class Directive
         'sandbox',
         'report-uri',
     );
+    */
 
     // CSP 1.1
+    /*
     protected $directives_v1_1_only = array(
         'base-uri',
         'child-src',
@@ -40,6 +43,7 @@ class Directive
         'options',
         'nonce-value',
     );
+    */
 
     // Types of source expressions.
     // TODO: move this somewhere else.
@@ -63,10 +67,12 @@ class Directive
     // supports the X-* variants and not the full 1.0 or 1.1 standard.
     // (Also belongs somewhere else.)
 
+    /*
     protected $headers = array(
         'Content-Security-Policy',
         'Content-Security-Policy-Report-Only',
     );
+    */
 
     /**
      * Return directive names.

@@ -4,6 +4,7 @@ namespace Academe\Csp\Value;
 
 /**
  * Source abstract.
+ * TODO: this is now a more generic "directive value" abstract. Rename and perhaps move it.
  */
 
 abstract class SourceAbstract implements SourceInterface
