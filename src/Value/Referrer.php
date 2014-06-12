@@ -24,6 +24,12 @@ class Referrer extends SourceAbstract
     const VALUE_LIST_PREFIX = 'REF_';
 
     /**
+     * The current token.
+     */
+
+    protected $token;
+
+    /**
      * Return an array of lower-case valid referrer tokens.
      */
 

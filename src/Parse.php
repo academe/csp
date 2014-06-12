@@ -4,6 +4,8 @@ namespace Academe\Csp;
 
 /**
  * Provide CSP string parsing and construction functionality.
+ * This parses the raw HTTP x header value.
+ *
  * TODO: Parse should perhaps catch all exceptions raised during the parsing and set
  * flags to indicate where they occured. Since the policy to parse comes from a third
  * party, we want to make a good attempt at parsing as much of it as we can.
@@ -13,6 +15,9 @@ class Parse
 {
     // Allowed white space characters.
     const WSP = " \t";
+
+    // Character that separates directives in a directive list.
+    const DIRSEP = ';';
 
     /**
      * Parse a security policy string into a Policy object.
@@ -26,7 +31,7 @@ class Parse
         // being percentage escaped. This will only happen in SourceHost as there
         // are no semi-colons in any of the other directives.
 
-        $directive_list = explode(';', $policy_string);
+        $directive_list = explode(static::DIRSEP, $policy_string);
 
         // The Policy object we will return.
         // TODO: use some kind of factory.
@@ -37,10 +42,14 @@ class Parse
 
         foreach($directive_list as $directive_string) {
             // Parse this single directive.
+            // Trim any white space and empty directives.
 
-            $directive = $this->parseDirective(ltrim($directive_string, self::WSP));
+            $directive = $this->parseDirective(ltrim($directive_string, static::WSP . static::DIRSEP));
 
             // If it was not parsable, then skip it.
+            // We want to catch as many directives as we can. We probably don't
+            // want to skip any completely, but perhaps add a "raw" directive to
+            // the policy and mark it as unparsable.
 
             if ( ! isset($directive)) {
                 continue;
@@ -140,7 +149,7 @@ class Parse
 
     /**
      * Convert a source expression string into a source object.
-     * Decoding is done here of any encoding used just for presentation.
+     * Decoding is done here of any encoding used, to get to the underlying data.
      */
 
     public function parseSourceExpression($source_expression)
@@ -152,9 +161,15 @@ class Parse
             return new Value\SourceNone();
         }
 
-        // Match a keyword.
-        if (Value\SourceKeyword::isValidKeyword($source_expression)) {
-            return new Value\SourceKeyword($source_expression);
+        // If it begins with a single quote, then it must be a keyword.
+        if (substr($source_expression, 0, 1) == "'") {
+            // Match a keyword.
+            if (Value\SourceKeyword::isValidKeyword($source_expression)) {
+                return new Value\SourceKeyword($source_expression);
+            } else {
+                // Not a valid keyword, so return an "unknown".
+                return new Value\Unknown($source_expression);
+            }
         }
 
         // Match a scheme.
@@ -165,20 +180,31 @@ class Parse
         // Match a hash.
         $valid_algos = Value\SourceHash::validAlgos();
 
-        // TODO: check this RE (matches base64 string).
-        if (preg_match('/^\'(' . implode('|', $valid_algos) . ')-[a-z0-9+\/_=-]*\'$/i', $source_expression)) {
+        if (preg_match('/^\'(' . implode('|', $valid_algos) . ')-.*\'$/i', $source_expression)) {
             list($algo, $hash_base64_value) = explode('-', trim($source_expression, "'"), 2);
-            $hash = new Value\SourceHash($algo);
 
-            // Pass in the base64 encoded value.
-            return $hash->setValueBase64($hash_base64_value);
+            if ($this->validBase64($hash_base64_value)) {
+                $hash = new Value\SourceHash($algo);
+
+                // Pass in the base64 encoded value.
+                return $hash->setValueBase64($hash_base64_value);
+            } else {
+                // base64 validatino fails.
+                return new Value\Unknown($source_expression);
+            }
         }
 
         // Match a nonce.
-        // TODO: check this RE (matches base64 string).
-        if (preg_match('/^\'nonce-[a-z0-9+\/_=-]*\'$/i', $source_expression)) {
+        if (preg_match('/^\'nonce-.*\'$/i', $source_expression)) {
             list(, $nonce_base64_value) = explode('-', trim($source_expression, "'"), 2);
-            return new Value\SourceNonce($nonce_base64_value);
+
+            if ($this->validBase64($nonce_base64_value)) {
+                // Is a valid base64 nonce
+                return new Value\SourceNonce($nonce_base64_value);
+            } else {
+                // base64 validatino fails.
+                return new Value\Unknown($source_expression);
+            }
         }
 
         // Assume whatever is left, will be a host.
@@ -190,6 +216,16 @@ class Parse
         return new Value\SourceHost(
             Value\SourceHost::decode($source_expression)
         );
+    }
+
+    /**
+     * Test whether a value is a valid base64 string.
+     * TODO: move this. Also useful in Value\SourceHash and Value\SourceNonce
+     */
+
+    public function validBase64($value)
+    {
+        return preg_match('/^[a-z0-9+\/_=-]*$/i', $value);
     }
 }
 

@@ -62,15 +62,12 @@ class Directive implements \Iterator
     // Values not documented in the RFC, but they look like a CSV list of tokens.
     const DIR_OPTIONS = 'options';
 
-    /**
-     * The whole expression list when set as the empty set.
-     * TODO: use Value\SourceNone::EMPTY_SET_EXPRESSION to avoid duplication.
-     */
-
-    //const EMPTY_SET_EXPRESSION = "'none'";
+    // Directive values separator character.
+    const VALUES_SEP = ' ';
 
     /**
      * True if this directive represents the empty set, i.e. match nothing.
+     * The empty set is mutually exclusive to any other values.
      */
 
     protected $is_empty_set = false;
@@ -84,11 +81,11 @@ class Directive implements \Iterator
     protected $name;
 
     /**
-     * The list of sources.
-     * TODO: "source" list, or is this now "directive values"?
+     * The list of values for the directive.
+     * For many directives, this will be a "source list".
      */
 
-    protected $source_list = array();
+    protected $directive_values = array();
 
     /**
      * Iterator methods for looping over the directives.
@@ -96,19 +93,19 @@ class Directive implements \Iterator
      */
 
     function rewind() {
-        return reset($this->source_list);
+        return reset($this->directive_values);
     }
     function current() {
-        return current($this->source_list);
+        return current($this->directive_values);
     }
     function key() {
-        return key($this->source_list);
+        return key($this->directive_values);
     }
     function next() {
-        return next($this->source_list);
+        return next($this->directive_values);
     }
     function valid() {
-        return key($this->source_list) !== null;
+        return key($this->directive_values) !== null;
     }
 
     /**
@@ -133,13 +130,16 @@ class Directive implements \Iterator
      * Convert to a string for use in a header or meta tag.
      * TODO: Some directive types may use different separators when imploding (e.g. options). Some only
      * support one value (so we just render the first or the last, or error if there is more than one).
-     * The values array property should probably not even be called "source_list" now.
      */
 
     public function render()
     {
-        // Join the sources together with a space and prefix the directive name.
-        return trim($this->getName() . ' ' . implode(' ', $this->source_list));
+        // Join the directive values together with a space, and prefix this with the directive name.
+
+        return trim(
+            $this->getName() . static::VALUES_SEP . implode(static::VALUES_SEP, $this->directive_values),
+            static::VALUES_SEP
+        );
     }
 
     /**
@@ -192,15 +192,19 @@ class Directive implements \Iterator
      * not form part of the policy syntax.
      * Duplicates are skipped.
      * These are just strings for now, and I'm not sure the benefit of
-     * takening them further as objects.
-     * If 'none' is supplied, then that overrides the entire source list.
+     * taking them further as objects.
+     * If 'none' is supplied, then that overrides the values/entire source list.
      * Similarly, if 'none' already is the source list, then no other sources
      * can be added.
-     * TODO: a source is just one type of value that can be added. Some directives
-     * accept only one value, some accept non-source values (e.g. media types).
      */
 
+    // Deprecated. Use addValue()
     public function addSource(Value\SourceInterface $source)
+    {
+        return static::addValue($source);
+    }
+
+    public function addValue(Value\SourceInterface $source)
     {
         // If the empty list expression is supplied, then the whole source list becomes 'empty'.
 
@@ -215,13 +219,13 @@ class Directive implements \Iterator
         // This is just to weed out duplicates.
         $hash = $this->sourceExpressionHash($source);
 
-        if ( ! isset($this->source_list[$hash])) {
+        if ( ! isset($this->directive_values[$hash])) {
             // If the Directive is the empty set now, then reset that state.
             if ($this->is_empty_set) {
                 $this->setEmpty(false);
             }
 
-            $this->source_list[$hash] = $source;
+            $this->directive_values[$hash] = $source;
         }
 
         return $this;
@@ -237,12 +241,18 @@ class Directive implements \Iterator
     }
 
     /**
-     * Add a source expression list (an array).
+     * Add a directive values list (an array).
      */
 
-    public function addSourceList($source_list)
+    // Deprecated. Use addValues()
+    public function addSourceList($directive_values)
     {
-        foreach($source_list as $source) {
+        return static::addValues($directive_values);
+    }
+
+    public function addValues($directive_values)
+    {
+        foreach($directive_values as $source) {
             $this->addSource($source);
         }
 
@@ -250,12 +260,18 @@ class Directive implements \Iterator
     }
 
     /**
-     * Get all the source expressions.
+     * Get all the directive values (sometimes source expressions).
      */
 
-    public function getSourceList($source_list)
+    // Deprecated. User getValues()
+    public function getSourceList($directive_values)
     {
-        return $this->source_list;
+        return static::getValues();
+    }
+
+    public function getValues($directive_values)
+    {
+        return $this->directive_values;
     }
 
     /**
@@ -271,12 +287,12 @@ class Directive implements \Iterator
             // Set the empty set state.
             // TODO: we need to set the empty set keyword source object, and not a simple string.
 
-            $this->source_list = array(new Value\SourceNone());
+            $this->directive_values = array(new Value\SourceNone());
             $this->is_empty_set = true;
         } elseif ($this->is_empty_set && ! $state) {
             // Reset (remove) the empty set state.
 
-            $this->source_list = array();
+            $this->directive_values = array();
             $this->is_empty_set = false;
         }
 
@@ -285,7 +301,6 @@ class Directive implements \Iterator
 
     /**
      * Remove the empty set flag and 'none' source expression, if set.
-     * TODO: is there a more elegant way than this?
      */
 
     public function setNotEmpty()
