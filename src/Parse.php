@@ -9,6 +9,13 @@ namespace Academe\Csp;
  * TODO: Parse should perhaps catch all exceptions raised during the parsing and set
  * flags to indicate where they occured. Since the policy to parse comes from a third
  * party, we want to make a good attempt at parsing as much of it as we can.
+ *
+ * TODO: when HTTP headers are parsed, if the same header appears more than once, then
+ * each header value may be concatenated as a single string, separated by commas. We
+ * need to recognise this here when parsing the header string. Commas in any diective
+ * value will be percent-encoded, so we can safely explode the policy string into 
+ * multiple directive lists that are then combined into a single directive list.
+ * Just substituting commas with semi-colons may be all we need to do.
  */
 
 class Parse
@@ -17,7 +24,11 @@ class Parse
     const WSP = " \t";
 
     // Character that separates directives in a directive list.
-    const DIRSEP = ';';
+    const DIR_SEP = ';';
+
+    // The separator when multiple headers of the same name have their values combined into
+    // one string. The PSR-7 HTTP library would do this before we get to see the header value.
+    const HEADER_VALUE_SEP = ',';
 
     /**
      * Parse a security policy string into a Policy object.
@@ -27,11 +38,19 @@ class Parse
     {
         // TODO: assert the policy is a string.
         // The directives are separated by semi-colons.
+
+        // Replace commas with semi-colons.
+        // Un-encoded commas singnify the combining of the values of multiple CSP headers.
+        // We just treat it as one header by replacing the header value separator with the
+        // directive separator.
+
+        $policy_string = str_replace(static::HEADER_VALUE_SEP, static::DIR_SEP, $policy_string);
+
         // Semi-colons are not allowed anywhere else in the directive list without
         // being percentage escaped. This will only happen in SourceHost as there
         // are no semi-colons in any of the other directives.
 
-        $directive_list = explode(static::DIRSEP, $policy_string);
+        $directive_list = explode(static::DIR_SEP, $policy_string);
 
         // The Policy object we will return.
         // TODO: use some kind of factory.
@@ -44,7 +63,7 @@ class Parse
             // Parse this single directive.
             // Trim any white space and empty directives.
 
-            $directive = $this->parseDirective(ltrim($directive_string, static::WSP . static::DIRSEP));
+            $directive = $this->parseDirective(ltrim($directive_string, static::WSP . static::DIR_SEP));
 
             // If it was not parsable, then skip it.
             // We want to catch as many directives as we can. We probably don't
