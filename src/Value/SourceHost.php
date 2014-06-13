@@ -6,6 +6,8 @@ namespace Academe\Csp\Value;
  * Host source expression.
  */
 
+use Academe\Csp\Parse as Parse;
+
 class SourceHost extends SourceAbstract
 {
     /**
@@ -62,15 +64,18 @@ class SourceHost extends SourceAbstract
      * Decode percentage encoding from a source expression.
      * The RFC states that only ; and , will be encoded, and only into %3B and %2C respectively.
      * We will take it at face value and just decode those two characters.
+     * TODO: we should make the decoding case-insensitive. Catering for bad encoding is a
+     * pragmatic approach to help reliability when we have no control of the source data.
      * It may make more sence to decode ANY percent-encoded character using rawurldecode() and make it
      * case-insensitive.
+     * TODO: these are Academe\Csp\Parse::DIRECTIVE_SEP and Academe\Csp\Parse::HEADER_VALUE_SEP
      */
 
     public static function decode($source_expression)
     {
         return str_replace(
             array('%3B', '%2C'),
-            array(';', ','),
+            array(Parse::DIRECTIVE_SEP, Parse::HEADER_VALUE_SEP),
             $source_expression
         );
     }
@@ -83,7 +88,7 @@ class SourceHost extends SourceAbstract
     public static function encode($source_expression)
     {
         return str_replace(
-            array(';', ','),
+            array(Parse::DIRECTIVE_SEP, Parse::HEADER_VALUE_SEP),
             array('%3B', '%2C'),
             $source_expression
         );

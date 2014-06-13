@@ -24,7 +24,7 @@ class Parse
     const WSP = " \t";
 
     // Character that separates directives in a directive list.
-    const DIR_SEP = ';';
+    const DIRECTIVE_SEP = ';';
 
     // The separator when multiple headers of the same name have their values combined into
     // one string. The PSR-7 HTTP library would do this before we get to see the header value.
@@ -32,25 +32,32 @@ class Parse
 
     /**
      * Parse a security policy string into a Policy object.
+     * @todo could also be an array of policies, depending on how the headers
+     * library has fetched multiple headers.
      */
 
     public function parsePolicy($policy_string)
     {
-        // TODO: assert the policy is a string.
+        // TODO: assert the policy is a string or array.
         // The directives are separated by semi-colons.
+
+        // If an array, then combine into a single string for parsing.
+        if (is_array($policy_string)) {
+            $policy_string = implode(static::DIRECTIVE_SEP, $policy_string);
+        }
 
         // Replace commas with semi-colons.
         // Un-encoded commas singnify the combining of the values of multiple CSP headers.
         // We just treat it as one header by replacing the header value separator with the
         // directive separator.
 
-        $policy_string = str_replace(static::HEADER_VALUE_SEP, static::DIR_SEP, $policy_string);
+        $policy_string = str_replace(static::HEADER_VALUE_SEP, static::DIRECTIVE_SEP, $policy_string);
 
         // Semi-colons are not allowed anywhere else in the directive list without
         // being percentage escaped. This will only happen in SourceHost as there
         // are no semi-colons in any of the other directives.
 
-        $directive_list = explode(static::DIR_SEP, $policy_string);
+        $directive_list = explode(static::DIRECTIVE_SEP, $policy_string);
 
         // The Policy object we will return.
         // TODO: use some kind of factory.
@@ -63,7 +70,7 @@ class Parse
             // Parse this single directive.
             // Trim any white space and empty directives.
 
-            $directive = $this->parseDirective(ltrim($directive_string, static::WSP . static::DIR_SEP));
+            $directive = $this->parseDirective(ltrim($directive_string, static::WSP . static::DIRECTIVE_SEP));
 
             // If it was not parsable, then skip it.
             // We want to catch as many directives as we can. We probably don't
