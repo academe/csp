@@ -95,5 +95,8 @@ https://www.isecpartners.com/media/106598/csp_best_practices.pdf
 CSP playground with working examples to try out with your browser:  
 http://www.cspplayground.com/
 
- Open Web Application Security Project (OWASP) CSP page:  
+Open Web Application Security Project (OWASP) CSP page:  
 https://www.owasp.org/index.php/Content_Security_Policy
+
+Another good overview:  
+http://www.ibuildings.com/blog/2013/03/4-http-security-headers-you-should-always-be-using
